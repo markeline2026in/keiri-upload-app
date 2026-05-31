@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MARKELINE 経理書類アップロード</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
+  :root {
+    --bg:#f5f5f0;--surface:#fff;--border:#e0dfd8;--border2:#c8c7be;
+    --text:#1a1a18;--text2:#6b6b64;--text3:#9b9b92;
+    --accent:#1a4fd6;--accent-bg:#eef2fd;
+    --success:#0a7c4f;--success-bg:#eaf5f0;
+    --danger:#c0392b;--danger-bg:#fdf0ee;
+    --shadow:0 2px 12px rgba(0,0,0,.06);--shadow2:0 4px 24px rgba(0,0,0,.10);
+    --radius:10px;--radius-sm:6px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.6}
+  .header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 2rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px}
+  .logo-mark{width:28px;height:28px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;color:white;font-size:14px}
+  .user-info{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2)}
+  .user-avatar{width:30px;height:30px;border-radius:50%;background:var(--accent-bg);border:1.5px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:var(--accent);overflow:hidden}
+  .user-avatar img{width:100%;height:100%;object-fit:cover}
+  .btn-signout{padding:4px 12px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:white;color:var(--text2);font-size:12px;cursor:pointer;font-family:inherit;transition:all .15s}
+  .btn-signout:hover{background:var(--bg);color:var(--text)}
+  .login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg)}
+  .login-card{background:white;border:1px solid var(--border);border-radius:16px;padding:3rem 2.5rem;text-align:center;max-width:400px;width:90%;box-shadow:var(--shadow2)}
+  .login-logo{width:56px;height:56px;background:var(--accent);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px;color:white;margin:0 auto 1.5rem}
+  .login-title{font-size:20px;font-weight:700;margin-bottom:8px}
+  .login-sub{font-size:13px;color:var(--text2);margin-bottom:2rem;line-height:1.7}
+  .btn-google{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px 20px;border:1.5px solid var(--border2);border-radius:var(--radius);background:white;color:var(--text);font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+  .btn-google:hover{background:var(--bg);box-shadow:var(--shadow)}
+  .btn-google svg{width:18px;height:18px;flex-shrink:0}
+  .main{max-width:720px;margin:0 auto;padding:2rem 1.5rem}
+  .tabs{display:flex;border-bottom:1.5px solid var(--border);margin-bottom:1.5rem}
+  .tab{padding:10px 20px;font-size:14px;font-weight:500;cursor:pointer;border:none;background:transparent;color:var(--text2);border-bottom:2px solid transparent;margin-bottom:-1.5px;transition:all .15s;font-family:inherit}
+  .tab.on{color:var(--accent);border-bottom-color:var(--accent)}
+  .tab:hover:not(.on){color:var(--text)}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
+  .card-title{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
+  .ftree{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+  .fcols{display:grid;grid-template-columns:1fr 1fr 1fr}
+  .fcol{border-right:1px solid var(--border)}
+  .fcol:last-child{border-right:none}
+  .fhead{font-size:11px;font-weight:700;color:var(--text3);padding:8px 12px;background:var(--bg);border-bottom:1px solid var(--border);letter-spacing:.05em;text-transform:uppercase}
+  .fcol-body{max-height:280px;overflow-y:auto}
+  .fi{display:flex;align-items:center;gap:7px;padding:8px 12px;cursor:pointer;font-size:13px;color:var(--text2);transition:background .1s;border-bottom:1px solid var(--border);line-height:1.4}
+  .fi:last-child{border-bottom:none}
+  .fi:hover{background:var(--bg);color:var(--text)}
+  .fi.on{background:var(--accent-bg);color:var(--accent);font-weight:500}
+  .fhint{padding:12px;font-size:13px;color:var(--text3);text-align:center}
+  .fok{padding:12px;font-size:13px;color:var(--success);text-align:center}
+  .fresult{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;margin-top:10px;min-height:40px;color:var(--text2)}
+  .fresult.set{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
+  .path{font-family:'DM Mono',monospace;font-size:12px;word-break:break-all}
+  .dz{border:2px dashed var(--border2);border-radius:var(--radius);padding:2rem;text-align:center;cursor:pointer;background:var(--bg);position:relative;transition:all .2s}
+  .dz:hover,.dz.over{border-color:var(--accent);background:var(--accent-bg)}
+  .dz input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+  .dz-icon{font-size:32px;margin-bottom:8px;color:var(--text3)}
+  .dz-text{font-size:14px;color:var(--text2);font-weight:500}
+  .dz-sub{font-size:12px;color:var(--text3);margin-top:4px}
+  .fl{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+  .fitem{display:flex;align-items:center;gap:10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px}
+  .fitem-icon{font-size:18px;color:var(--accent);flex-shrink:0}
+  .fitem-info{flex:1;min-width:0}
+  .fitem-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .fitem-size{font-size:12px;color:var(--text3)}
+  .fitem-status{font-size:12px;font-weight:500}
+  .fitem-status.done{color:var(--success)}
+  .fitem-status.error{color:var(--danger)}
+  .frm{background:none;border:none;cursor:pointer;color:var(--text3);font-size:16px;padding:2px;border-radius:4px;flex-shrink:0}
+  .frm:hover{color:var(--danger);background:var(--danger-bg)}
+  .pb{height:3px;background:var(--border);border-radius:99px;overflow:hidden;margin-top:5px}
+  .pf{height:100%;background:var(--accent);border-radius:99px;transition:width .4s}
+  .actions{display:flex;justify-content:flex-end;gap:8px;margin-top:1rem}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:var(--radius-sm);font-size:14px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:white;color:var(--text);transition:all .15s;font-family:inherit}
+  .btn:hover{background:var(--bg)}
+  .btn.pri{background:var(--accent);color:white;border-color:var(--accent)}
+  .btn.pri:hover{opacity:.9}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  textarea{width:100%;height:60px;resize:vertical;font-size:14px;font-family:inherit;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;background:var(--bg);color:var(--text);outline:none;transition:border-color .15s}
+  textarea:focus{border-color:var(--accent);background:white}
+  .toast-wrap{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px}
+  .toast{padding:12px 16px;border-radius:var(--radius);font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;box-shadow:var(--shadow2);animation:slideIn .3s ease;max-width:320px}
+  .toast.ok{background:var(--success);color:white}
+  .toast.err{background:var(--danger);color:white}
+  @keyframes slideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .sg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.25rem}
+  .sc{background:white;border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;box-shadow:var(--shadow)}
+  .sl{font-size:12px;color:var(--text3);margin-bottom:4px}
+  .sv{font-size:22px;font-weight:700;color:var(--text)}
+  .fbar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+  .fbar select,.fbar input{font-size:13px;padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:white;color:var(--text);font-family:inherit;outline:none}
+  .fbar input{flex:1;min-width:100px}
+  .hi{display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid var(--border)}
+  .hi:last-child{border-bottom:none}
+  .hav{width:34px;height:34px;border-radius:50%;background:var(--accent-bg);border:1.5px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--accent);flex-shrink:0;overflow:hidden}
+  .hav img{width:100%;height:100%;object-fit:cover}
+  .hb{flex:1;min-width:0}
+  .ht{font-size:14px;font-weight:600;color:var(--text)}
+  .hm{font-size:12px;color:var(--text3);margin-top:3px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .hp{font-size:12px;color:var(--text2);margin-top:4px;font-family:'DM Mono',monospace;word-break:break-all}
+  .hfs{margin-top:6px;display:flex;flex-wrap:wrap;gap:4px}
+  .chip{font-size:12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:2px 8px;color:var(--text2)}
+  .badge{display:inline-flex;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600}
+  .badge.ok{background:var(--success-bg);color:var(--success)}
+  .badge.err{background:var(--danger-bg);color:var(--danger)}
+  .empty{text-align:center;padding:3rem;color:var(--text3)}
+  .sp{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @media(max-width:600px){.fcols{grid-template-columns:1fr}.fcol{border-right:none;border-bottom:1px solid var(--border)}.sg{grid-template-columns:1fr 1fr}.header{padding:0 1rem}.main{padding:1.25rem 1rem}}
+</style>
+</head>
+<body>
+
+<div id="login-screen" class="login-screen">
+  <div class="login-card">
+    <div class="login-logo">📁</div>
+    <div class="login-title">経理書類アップロード</div>
+    <div class="login-sub">MARKELINEの経理書類を<br>Google Driveへ安全にアップロード</div>
+    <button class="btn-google" onclick="signIn()">
+      <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+      Googleアカウントでログイン
+    </button>
+  </div>
+</div>
+
+<div id="app-screen" style="display:none">
+  <header class="header">
+    <div class="logo">
+      <div class="logo-mark">📁</div>
+      MARKELINE 経理アップロード
+    </div>
+    <div class="user-info">
+      <div class="user-avatar" id="header-avatar"></div>
+      <span id="header-name"></span>
+      <button class="btn-signout" onclick="signOut()">ログアウト</button>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="tabs">
+      <button class="tab on" id="tb-up" onclick="sw('up')">📤 アップロード</button>
+      <button class="tab" id="tb-hi" onclick="sw('hi')">📋 チーム履歴</button>
+    </div>
+
+    <div id="pane-up">
+      <div class="card">
+        <div class="card-title">保存先フォルダを選択</div>
+        <div class="ftree">
+          <div class="fcols">
+            <div class="fcol"><div class="fhead">月</div><div class="fcol-body" id="c1"></div></div>
+            <div class="fcol"><div class="fhead">カテゴリ</div><div class="fcol-body" id="c2"></div></div>
+            <div class="fcol"><div class="fhead">詳細</div><div class="fcol-body" id="c3"></div></div>
+          </div>
+        </div>
+        <div class="fresult" id="fresult">📁 <span style="color:var(--text3)">月・カテゴリを選択してください</span></div>
+      </div>
+      <div class="card">
+        <div class="card-title">メモ（任意）</div>
+        <textarea id="memo" placeholder="取引先名・補足など"></textarea>
+      </div>
+      <div class="card">
+        <div class="card-title">ファイル選択</div>
+        <div class="dz" id="dz" ondragover="doDrag(event)" ondragleave="doLeave(event)" ondrop="doDrop(event)">
+          <input type="file" id="fi" multiple onchange="onFiles(event)">
+          <div class="dz-icon">☁️</div>
+          <div class="dz-text">ドロップまたはクリックしてファイルを選択</div>
+          <div class="dz-sub">PDF・画像・Excel・Word・CSV など 最大50MB</div>
+        </div>
+        <div class="fl" id="fl"></div>
+      </div>
+      <div class="actions">
+        <button class="btn" onclick="clearAll()">🗑 クリア</button>
+        <button class="btn pri" id="upbtn" onclick="doUp()" disabled>📤 アップロード</button>
+      </div>
+    </div>
+
+    <div id="pane-hi" style="display:none">
+      <div class="sg" id="stats"></div>
+      <div class="fbar">
+        <select id="f1" onchange="renderH()"><option value="">全月</option></select>
+        <select id="f2" onchange="renderH()"><option value="">全カテゴリ</option></select>
+        <select id="f3" onchange="renderH()"><option value="">全スタッフ</option></select>
+        <input type="text" id="fq" placeholder="メモ・パスで検索..." oninput="renderH()">
+        <button class="btn" onclick="loadH()" style="padding:6px 12px">🔄</button>
+      </div>
+      <div class="card"><div id="hlist"></div></div>
+    </div>
+  </main>
+</div>
+
+<div class="toast-wrap" id="tw"></div>
+
+<script>
+const CLIENT_ID='517894712902-snug0s0mnhrjli3t0k1730p4cdgt6ttc.apps.googleusercontent.com';
+const SCOPES='https://www.googleapis.com/auth/drive.file';
+const SKEY='keiri-hist-v10';
+
+const MONTHS=[
+  {id:'1lK_aKf8oEY_8cutEHVqgYu5TVn3XHLn2',label:'R8.7'},
+  {id:'196WXrmowVSpbd0A2nnf_3-lSIOiBsk1C', label:'R8.6'},
+  {id:'1EfMBfDFuD0XsTHmRehyraCkqgSvXVOU_', label:'R8.5'},
+];
+const CATS=[
+  {key:'1', label:'1. 通帳'},
+  {key:'2', label:'2. 売上請求書（毎月分）'},
+  {key:'3', label:'3. 売上請求書（補助金など単発）'},
+  {key:'4', label:'4. 契約書',subs:[{key:'4a',label:'社内MARKELINEスタッフ'},{key:'4b',label:'クライアントへの発行'},{key:'4c',label:'弊社が対応分'}]},
+  {key:'5', label:'5. 人件費請求書',subs:[{key:'5a',label:'Lステップ'},{key:'5b',label:'ママさん'}]},
+  {key:'6', label:'6. 外注費請求書',subs:[{key:'6a',label:'動画制作'},{key:'6b',label:'支払い済み分'},{key:'6c',label:'外部委託'}]},
+  {key:'7', label:'7. 旅費精算書'},
+  {key:'8', label:'8. 領収書（データ）'},
+  {key:'9', label:'9. 総振扱の明細'},
+  {key:'10',label:'10. カード明細（csv）'},
+  {key:'11',label:'11. その他'},
+  {key:'12',label:'12. 追加資料'},
+  {key:'13',label:'13. 過去分追加'},
+  {key:'14',label:'14. IT導入補助金'},
+];
+const FIDS={
+  '1EfMBfDFuD0XsTHmRehyraCkqgSvXVOU_':{'1':'1ypvg6NqXObHTfJuttmtPAwkXzQB_iQJT','2':'1mwo7HMkl_dgDo8NwakEI9EW3h0-WM5o5','3':'1FFGLcRgDKRBxb4oBkB8DgOLamNYuDAal','4':'1UUEPD-GqScXaWvvp7Mt60XQLubuGYfP3','4a':'1t09LT0XsVBnCo6vNmxI_W_LiF5OcZn9N','4b':'1eAG5ir4Xg9S22u2IH9GNotkOu2ltcHRp','4c':'1xWI-288QQLMpEPOR6k6ykeVuRkEGojZA','5':'12gzENe3NjVHneiu-F9JqXxAUUq9jigJl','5a':'1WJ9i7F2z1ot2G3wwDN4_VPfK8fOI5BJ2','5b':'13Zub-s9QVVrWN1RDcJMFLhGGRarQhLLM','6':'1Eic1CuR9VIbFFk0jaSjVEDwqy9Qi5XJB','6a':'17b8-dR-zLRvDp-jIBmbVGLv9y6nO_c8Y','6b':'1GIBOsG1BEW-8kdTuqlcs2pmEQf-TZs7I','6c':'1orLfBVxdXXrGTQjJqscyR89VvlnOeSEk','7':'1eGwTx0d3u6J0mC5H-fEO1LgcfaQcSXdI','8':'1fLhkb5jXJvNb-ujy929P9sT6Vcxg2R28','9':'1Pi31l3Hi7xO3QBi--0A_mANbPZ17hVGq','10':'1w27sofKeVQSKXgTJ7-BXPdz_Pt6yKPyC','11':'1azd0x4xM0RuAHxV_RQZNrNYtgLgqewDv','12':'17w-w0gJYcoCgx_V_TvVkuLep2QAUdhHi','13':'158aXOVROQFiDlWuNEhVx-FAe2edIM4gK','14':'14mKMDmInUNma7TOhOWm4qDbV9IGlY2bA'},
+  '196WXrmowVSpbd0A2nnf_3-lSIOiBsk1C':{'1':'12IB1bh5L-a-l9fJRIwNRJPGfvHEmx_Qd','2':'1IF4C3hEW_T3PHX576gt2yFG1AKw-Xe96','3':'1hwb50y8JznB3U3kbL-_XRMF1GdSi8g6j','4':'1PqLJsTSZImoFTxrr-UU1W7-Y1FKGtcwr','4a':'1wpyqalmAqQth-Gb83acQcGmRF0-g_rcQ','4b':'1NYKHbLFCs02Y0Yv7WJGgRT8hKeUPPGES','4c':'1udELSKh1SjMcGBA4vAknzMJ1i4RNexhq','5':'1lu-OYYf7JFtLSQpcCtXy5OUOwYc2PaQ6','5a':'1WWDUvAoCOjcY5R32XEG8_grPVBR2lu8R','5b':'1PteYeccsupZBNlYrQkzMiMFZRoXHSEER','6':'1KREWGcxmPLK12fMcddHk2WDsSPj0afWw','6a':'1BPzJGRpdIXtafTgspaO7qYb6WuvxMGUH','6b':'1CW7MZhuLWk4d57-UtWvpIa0IYrcrUcrs','6c':'1PoRn2XyNWHPpqyy56hk_q6jrBVewG4CD','7':'1yHSVQ2ODKFWLQaj-iDPYM7oCPA69ahcO','8':'1fnomzXvAHjrR0ZgdxqRUooCmpg8M1I1M','9':'1I9K2N1Zgnr43_KBI3IVg8V76Vn46BhlM','10':'1xPK4UrElAlTylaqQFWIg8_9hD1SgQKK8','11':'11U3BCHCMB3DsnIxm41DoEfHW21C5FUkF','12':'1ODQb5rINKeb1PhDmkKfgFwQWNINOWSj9','13':'1sne1Zo7meMqf3rhIuS1KdwNY1CX-d_y7','14':'11AFLXr7gSENo0yd4dmTKKU412IMfO-Yn'},
+  '1lK_aKf8oEY_8cutEHVqgYu5TVn3XHLn2':{'1':'1JYhmz296mZ3HrN69oxr3YxRq9uOnT6TL','2':'1-7xp-Eq-T8Io-JYmCG4jZp-47FOGI1eK','3':'1nExnExJ-NXfj8TezF06pGFkynnKMpnAL','4':'14-5Uq7310BNdlIm_Jc13kpnbhVBgkld6','4a':'1j12t_i5P9J6x82A6neIMDIKKwwI1Wawy','4b':'1Y09fxfnShHEKpPqz8BkeDOhzX4smdQoX','4c':'1W51iZJtkxQd8CU9HRqgKWZDboW7MT7z5','5':'1EBjdgv357HfHi32j-T2hfecaWK0JfUeR','5a':'1hOCQ5fp9q1pV9brm6Be4ovvQVhMUHPww','5b':'11QDB-pQdhiZww-bGSQEvlqfT1NYlNVJA','6':'1W75gVk4CVh2GudEYEesk2lqlHoQwcUoc','6a':'1u8CA2MpT3p-S3E-_nbPpGQ31wlw6CHhG','6b':'1Cf3nAXAbP01GS8cGifEgFM32ULRZBDy7','6c':'1KOucB2FeFYJKAzQTMXln-j1UiW7r6Ag1','7':'1HoDIqxMpHnjBHtDDllBOLI-O_4VlwwHR','8':'14xwZwjDPveFnvClU-6GF1z04KT5cI16l','9':'1zG_LsTEkf9BETcmPMgx3eCvjHZTGd1H-','10':'13Q3V30I_VttBi2nz9uPKRPk2cV9jXlwR','11':'1V1I9ONMyHJw_DyFY3rlDWst0tnPr94hU','12':'1LxLFhALLw42HovfURImcJgPr8yFLotDY','13':'1JFyWRhoaaK0kxaAwgMt4u6gGlRN7aPPU','14':'1DY_SFvlBLs0sLWEEwiic5d08ehS1YekC'},
+};
+
+let tokenClient,accessToken=null,currentUser=null;
+let selM=null,selC=null,selS=null,files=[],hist=[];
+
+function initGoogleAuth(){
+  tokenClient=google.accounts.oauth2.initTokenClient({
+    client_id:CLIENT_ID,scope:SCOPES,
+    callback:(resp)=>{
+      if(resp.error){toast('err','ログインに失敗しました');return;}
+      accessToken=resp.access_token;
+      fetchUserInfo();
+    }
+  });
+}
+function signIn(){if(!tokenClient){toast('err','初期化中です。少し待ってから再試行してください。');return;}tokenClient.requestAccessToken();}
+function signOut(){if(accessToken)google.accounts.oauth2.revoke(accessToken);accessToken=null;currentUser=null;document.getElementById('login-screen').style.display='flex';document.getElementById('app-screen').style.display='none';}
+async function fetchUserInfo(){
+  try{
+    const r=await fetch('https://www.googleapis.com/oauth2/v2/userinfo',{headers:{Authorization:`Bearer ${accessToken}`}});
+    currentUser=await r.json();
+    document.getElementById('header-name').textContent=currentUser.name||currentUser.email;
+    const av=document.getElementById('header-avatar');
+    av.innerHTML=currentUser.picture?`<img src="${currentUser.picture}" alt="">`:(currentUser.name||'U').slice(0,1);
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app-screen').style.display='block';
+    loadH();
+  }catch(e){toast('err','ユーザー情報の取得に失敗しました');}
+}
+window.onload=()=>{google.accounts.id.initialize({client_id:CLIENT_ID});initGoogleAuth();};
+
+function sw(t){
+  document.getElementById('pane-up').style.display=t==='up'?'':'none';
+  document.getElementById('pane-hi').style.display=t==='hi'?'':'none';
+  document.getElementById('tb-up').classList.toggle('on',t==='up');
+  document.getElementById('tb-hi').classList.toggle('on',t==='hi');
+  if(t==='hi')loadH();
+}
+function buildC1(){document.getElementById('c1').innerHTML=MONTHS.map(m=>`<div class="fi${selM===m.id?' on':''}" onclick="pickM('${m.id}')">📅 ${esc(m.label)}</div>`).join('');}
+function buildC2(){
+  const el=document.getElementById('c2');
+  if(!selM){el.innerHTML='<div class="fhint">← 月を選択</div>';return;}
+  el.innerHTML=CATS.map(c=>{const h=!!(FIDS[selM]&&FIDS[selM][c.key]);return`<div class="fi${selC===c.key?' on':''}" onclick="${h?'pickC(\''+c.key+'\')':''}" style="${!h?'opacity:.3;cursor:not-allowed':''}">📁 ${esc(c.label)}</div>`;}).join('');
+}
+function buildC3(){
+  const el=document.getElementById('c3');
+  if(!selM||!selC){el.innerHTML='<div class="fhint">← カテゴリを選択</div>';return;}
+  const cat=CATS.find(c=>c.key===selC);
+  if(!cat||!cat.subs){el.innerHTML='<div class="fok">✅ サブフォルダなし</div>';return;}
+  el.innerHTML=cat.subs.map(s=>`<div class="fi${selS===s.key?' on':''}" onclick="pickS('${s.key}')">📂 ${esc(s.label)}</div>`).join('');
+}
+function pickM(id){selM=id;selC=null;selS=null;buildC1();buildC2();buildC3();updateResult();updBtn();}
+function pickC(key){selC=key;selS=null;buildC2();buildC3();updateResult();updBtn();}
+function pickS(key){selS=key;buildC3();updateResult();updBtn();}
+function getTargetId(){
+  if(!selM||!selC)return null;
+  const cat=CATS.find(c=>c.key===selC);
+  if(cat&&cat.subs){if(!selS)return null;return FIDS[selM]?.[selS]||null;}
+  return FIDS[selM]?.[selC]||null;
+}
+function getPath(){
+  const tid=getTargetId();if(!tid)return null;
+  const m=MONTHS.find(x=>x.id===selM),cat=CATS.find(x=>x.key===selC);
+  if(cat&&cat.subs&&selS){const sub=cat.subs.find(s=>s.key===selS);return`第5期2 / ${m.label} / ${cat.label} / ${sub.label}`;}
+  return`第5期2 / ${m.label} / ${cat.label}`;
+}
+function updateResult(){
+  const el=document.getElementById('fresult'),path=getPath();
+  if(path){el.className='fresult set';el.innerHTML=`✅ <span class="path">${esc(path)}</span>`;}
+  else{el.className='fresult';const cat=CATS.find(c=>c.key===selC);const msg=!selM?'月・カテゴリを選択してください':!selC?'カテゴリを選択してください':(cat&&cat.subs&&!selS)?'詳細フォルダを選択してください':'月・カテゴリを選択してください';el.innerHTML=`📁 <span style="color:var(--text3)">${msg}</span>`;}
+}
+function updBtn(){document.getElementById('upbtn').disabled=!files.length||!getPath()||!accessToken;}
+
+function doDrag(e){e.preventDefault();document.getElementById('dz').classList.add('over');}
+function doLeave(e){document.getElementById('dz').classList.remove('over');}
+function doDrop(e){e.preventDefault();document.getElementById('dz').classList.remove('over');addFiles([...e.dataTransfer.files]);}
+function onFiles(e){addFiles([...e.target.files]);}
+function addFiles(fs){fs.forEach(f=>{if(f.size>50*1024*1024){toast('err',f.name+' は50MBを超えています');return;}if(!files.find(x=>x.name===f.name&&x.size===f.size))files.push(f);});renderFiles();updBtn();}
+function rmFile(i){files.splice(i,1);renderFiles();updBtn();}
+function renderFiles(){document.getElementById('fl').innerHTML=files.map((f,i)=>`<div class="fitem"><span class="fitem-icon">📄</span><div class="fitem-info"><div class="fitem-name">${esc(f.name)}</div><div class="fitem-size" id="fsize${i}">${fmtB(f.size)}</div></div><button class="frm" onclick="rmFile(${i})">✕</button></div>`).join('');}
+
+async function uploadToDrive(file,folderId){
+  const metadata={name:file.name,parents:[folderId]};
+  const form=new FormData();
+  form.append('metadata',new Blob([JSON.stringify(metadata)],{type:'application/json'}));
+  form.append('file',file);
+  const resp=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{method:'POST',headers:{Authorization:`Bearer ${accessToken}`},body:form});
+  if(!resp.ok){const err=await resp.json();throw new Error(err.error?.message||'アップロード失敗');}
+  return await resp.json();
+}
+
+async function doUp(){
+  if(!accessToken){toast('err','ログインが必要です');return;}
+  const path=getPath(),targetId=getTargetId();
+  if(!path||!targetId){toast('err','保存先フォルダを選択してください');return;}
+  if(!files.length){toast('err','ファイルを選択してください');return;}
+  const btn=document.getElementById('upbtn');
+  btn.disabled=true;btn.innerHTML='<div class="sp"></div> アップロード中...';
+  const results=[];
+  for(let i=0;i<files.length;i++){
+    const f=files[i];
+    const szEl=document.getElementById('fsize'+i);
+    if(szEl)szEl.innerHTML='<div class="pb"><div class="pf" style="width:60%"></div></div>';
+    try{
+      const df=await uploadToDrive(f,targetId);
+      if(szEl)szEl.innerHTML='<span class="fitem-status done">✅ 完了</span>';
+      results.push({name:f.name,size:f.size,status:'success',driveId:df.id});
+    }catch(e){
+      if(szEl)szEl.innerHTML=`<span class="fitem-status error">❌ ${e.message}</span>`;
+      results.push({name:f.name,size:f.size,status:'error',error:e.message});
+    }
+  }
+  const ok=results.filter(r=>r.status==='success').length;
+  const mLabel=MONTHS.find(x=>x.id===selM)?.label||'';
+  const cat=CATS.find(x=>x.key===selC);
+  const cLabel=cat?.label||'',sLabel=cat?.subs?.find(s=>s.key===selS)?.label||'';
+  const entry={id:Date.now(),ts:new Date().toISOString(),user:currentUser?.name||currentUser?.email||'不明',userPic:currentUser?.picture||'',path,month:mLabel,cat:cLabel,sub:sLabel,memo:document.getElementById('memo').value,files:results};
+  await loadH();hist.unshift(entry);
+  try{localStorage.setItem(SKEY,JSON.stringify(hist.slice(0,200)));}catch(e){}
+  btn.disabled=false;btn.innerHTML='📤 アップロード';
+  if(ok===results.length){toast('ok',`${ok}件を「${sLabel||cLabel}」に保存しました`);setTimeout(()=>clearAll(),2000);}
+  else toast('err',`${ok}/${results.length}件成功（${results.length-ok}件失敗）`);
+}
+
+function clearAll(){files=[];document.getElementById('fi').value='';document.getElementById('memo').value='';renderFiles();updBtn();}
+
+async function loadH(){try{hist=JSON.parse(localStorage.getItem(SKEY)||'[]');}catch(e){hist=[];}renderH();renderStats();refreshF();}
+function renderStats(){const total=hist.length,ftot=hist.reduce((s,h)=>s+(h.files?.length||0),0),users=new Set(hist.map(h=>h.user).filter(Boolean)).size;document.getElementById('stats').innerHTML=`<div class="sc"><div class="sl">総アップロード</div><div class="sv">${total}</div></div><div class="sc"><div class="sl">ファイル数</div><div class="sv">${ftot}</div></div><div class="sc"><div class="sl">担当者数</div><div class="sv">${users}</div></div>`;}
+function refreshF(){const months=[...new Set(hist.map(h=>h.month).filter(Boolean))],cats=[...new Set(hist.map(h=>h.cat).filter(Boolean))],users=[...new Set(hist.map(h=>h.user).filter(Boolean))];['f1','f2','f3'].forEach((id,i)=>{const arr=[months,cats,users][i],ph=['全月','全カテゴリ','全スタッフ'][i],el=document.getElementById(id),prev=el.value;el.innerHTML=`<option value="">${ph}</option>`+arr.map(v=>`<option${v===prev?' selected':''}>${esc(v)}</option>`).join('');});}
+function renderH(){
+  const fm=document.getElementById('f1').value,fc=document.getElementById('f2').value,fu=document.getElementById('f3').value,fq=document.getElementById('fq').value.toLowerCase();
+  let items=hist;
+  if(fm)items=items.filter(h=>h.month===fm);if(fc)items=items.filter(h=>h.cat===fc);if(fu)items=items.filter(h=>h.user===fu);if(fq)items=items.filter(h=>(h.memo||'').toLowerCase().includes(fq)||(h.path||'').toLowerCase().includes(fq));
+  const el=document.getElementById('hlist');
+  if(!items.length){el.innerHTML='<div class="empty">📭 該当する履歴がありません</div>';return;}
+  el.innerHTML=items.slice(0,50).map(h=>{
+    const dt=new Date(h.ts).toLocaleDateString('ja-JP',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    const ok=h.files?.filter(f=>f.status==='success').length||0,tot=h.files?.length||0,dest=h.sub||h.cat||'不明';
+    const avContent=h.userPic?`<img src="${h.userPic}" alt="">`:esc((h.user||'?').slice(0,1));
+    return`<div class="hi"><div class="hav">${avContent}</div><div class="hb"><div class="ht">${esc(dest)}</div><div class="hm"><strong>${esc(h.user||'不明')}</strong><span>${esc(h.month||'')}</span><span>${dt}</span><span class="badge ${ok===tot?'ok':'err'}">${ok}/${tot}件</span></div><div class="hp">📁 ${esc(h.path||'')}</div>${h.memo?`<div style="font-size:12px;color:var(--text2);margin-top:4px">💬 ${esc(h.memo)}</div>`:''}<div class="hfs">${(h.files||[]).slice(0,5).map(f=>`<span class="chip">${esc(f.name)}</span>`).join('')}${(h.files?.length||0)>5?`<span class="chip">+${h.files.length-5}件</span>`:''}</div></div></div>`;
+  }).join('');
+}
+
+function toast(type,msg){const w=document.getElementById('tw'),d=document.createElement('div');d.className=`toast ${type}`;d.textContent=msg;w.appendChild(d);setTimeout(()=>d.remove(),4000);}
+function fmtB(b){if(b<1024)return b+'B';if(b<1048576)return Math.round(b/1024)+'KB';return(b/1048576).toFixed(1)+'MB';}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+buildC1();buildC2();buildC3();updateResult();
+</script>
+</body>
+</html>
