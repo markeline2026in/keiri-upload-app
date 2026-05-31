@@ -4,18 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MARKELINE 経理書類アップロード</title>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
-  :root {
-    --bg:#f5f5f0;--surface:#fff;--border:#e0dfd8;--border2:#c8c7be;
-    --text:#1a1a18;--text2:#6b6b64;--text3:#9b9b92;
-    --accent:#1a4fd6;--accent-bg:#eef2fd;
-    --success:#0a7c4f;--success-bg:#eaf5f0;
-    --danger:#c0392b;--danger-bg:#fdf0ee;
-    --shadow:0 2px 12px rgba(0,0,0,.06);--shadow2:0 4px 24px rgba(0,0,0,.10);
-    --radius:10px;--radius-sm:6px;
-  }
+  :root{--bg:#f5f5f0;--surface:#fff;--border:#e0dfd8;--border2:#c8c7be;--text:#1a1a18;--text2:#6b6b64;--text3:#9b9b92;--accent:#1a4fd6;--accent-bg:#eef2fd;--success:#0a7c4f;--success-bg:#eaf5f0;--danger:#c0392b;--danger-bg:#fdf0ee;--shadow:0 2px 12px rgba(0,0,0,.06);--shadow2:0 4px 24px rgba(0,0,0,.10);--radius:10px;--radius-sm:6px}
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.6}
   .header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 2rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
@@ -34,6 +25,7 @@
   .btn-google{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px 20px;border:1.5px solid var(--border2);border-radius:var(--radius);background:white;color:var(--text);font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s;box-shadow:0 1px 4px rgba(0,0,0,.06)}
   .btn-google:hover{background:var(--bg);box-shadow:var(--shadow)}
   .btn-google svg{width:18px;height:18px;flex-shrink:0}
+  .loading-msg{font-size:13px;color:var(--text3);margin-top:1rem}
   .main{max-width:720px;margin:0 auto;padding:2rem 1.5rem}
   .tabs{display:flex;border-bottom:1.5px solid var(--border);margin-bottom:1.5rem}
   .tab{padding:10px 20px;font-size:14px;font-weight:500;cursor:pointer;border:none;background:transparent;color:var(--text2);border-bottom:2px solid transparent;margin-bottom:-1.5px;transition:all .15s;font-family:inherit}
@@ -67,7 +59,7 @@
   .fitem-icon{font-size:18px;color:var(--accent);flex-shrink:0}
   .fitem-info{flex:1;min-width:0}
   .fitem-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .fitem-size{font-size:12px;color:var(--text3)}
+  .fitem-meta{font-size:12px;color:var(--text3)}
   .fitem-status{font-size:12px;font-weight:500}
   .fitem-status.done{color:var(--success)}
   .fitem-status.error{color:var(--danger)}
@@ -121,10 +113,11 @@
     <div class="login-logo">📁</div>
     <div class="login-title">経理書類アップロード</div>
     <div class="login-sub">MARKELINEの経理書類を<br>Google Driveへ安全にアップロード</div>
-    <button class="btn-google" onclick="signIn()">
+    <button class="btn-google" id="btn-login" onclick="signIn()" disabled>
       <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
       Googleアカウントでログイン
     </button>
+    <div class="loading-msg" id="loading-msg">認証システムを読み込み中...</div>
   </div>
 </div>
 
@@ -140,13 +133,11 @@
       <button class="btn-signout" onclick="signOut()">ログアウト</button>
     </div>
   </header>
-
   <main class="main">
     <div class="tabs">
       <button class="tab on" id="tb-up" onclick="sw('up')">📤 アップロード</button>
       <button class="tab" id="tb-hi" onclick="sw('hi')">📋 チーム履歴</button>
     </div>
-
     <div id="pane-up">
       <div class="card">
         <div class="card-title">保存先フォルダを選択</div>
@@ -178,7 +169,6 @@
         <button class="btn pri" id="upbtn" onclick="doUp()" disabled>📤 アップロード</button>
       </div>
     </div>
-
     <div id="pane-hi" style="display:none">
       <div class="sg" id="stats"></div>
       <div class="fbar">
@@ -192,12 +182,11 @@
     </div>
   </main>
 </div>
-
 <div class="toast-wrap" id="tw"></div>
 
 <script>
 const CLIENT_ID='517894712902-snug0s0mnhrjli3t0k1730p4cdgt6ttc.apps.googleusercontent.com';
-const SCOPES='https://www.googleapis.com/auth/drive.file';
+const SCOPES='https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email';
 const SKEY='keiri-hist-v10';
 
 const MONTHS=[
@@ -227,34 +216,84 @@ const FIDS={
   '1lK_aKf8oEY_8cutEHVqgYu5TVn3XHLn2':{'1':'1JYhmz296mZ3HrN69oxr3YxRq9uOnT6TL','2':'1-7xp-Eq-T8Io-JYmCG4jZp-47FOGI1eK','3':'1nExnExJ-NXfj8TezF06pGFkynnKMpnAL','4':'14-5Uq7310BNdlIm_Jc13kpnbhVBgkld6','4a':'1j12t_i5P9J6x82A6neIMDIKKwwI1Wawy','4b':'1Y09fxfnShHEKpPqz8BkeDOhzX4smdQoX','4c':'1W51iZJtkxQd8CU9HRqgKWZDboW7MT7z5','5':'1EBjdgv357HfHi32j-T2hfecaWK0JfUeR','5a':'1hOCQ5fp9q1pV9brm6Be4ovvQVhMUHPww','5b':'11QDB-pQdhiZww-bGSQEvlqfT1NYlNVJA','6':'1W75gVk4CVh2GudEYEesk2lqlHoQwcUoc','6a':'1u8CA2MpT3p-S3E-_nbPpGQ31wlw6CHhG','6b':'1Cf3nAXAbP01GS8cGifEgFM32ULRZBDy7','6c':'1KOucB2FeFYJKAzQTMXln-j1UiW7r6Ag1','7':'1HoDIqxMpHnjBHtDDllBOLI-O_4VlwwHR','8':'14xwZwjDPveFnvClU-6GF1z04KT5cI16l','9':'1zG_LsTEkf9BETcmPMgx3eCvjHZTGd1H-','10':'13Q3V30I_VttBi2nz9uPKRPk2cV9jXlwR','11':'1V1I9ONMyHJw_DyFY3rlDWst0tnPr94hU','12':'1LxLFhALLw42HovfURImcJgPr8yFLotDY','13':'1JFyWRhoaaK0kxaAwgMt4u6gGlRN7aPPU','14':'1DY_SFvlBLs0sLWEEwiic5d08ehS1YekC'},
 };
 
-let tokenClient,accessToken=null,currentUser=null;
+let tokenClient=null,accessToken=null,currentUser=null;
 let selM=null,selC=null,selS=null,files=[],hist=[];
 
-function initGoogleAuth(){
-  tokenClient=google.accounts.oauth2.initTokenClient({
-    client_id:CLIENT_ID,scope:SCOPES,
-    callback:(resp)=>{
-      if(resp.error){toast('err','ログインに失敗しました');return;}
-      accessToken=resp.access_token;
-      fetchUserInfo();
-    }
+// Google GISライブラリを動的に読み込む
+function loadGoogleScript(){
+  return new Promise((resolve,reject)=>{
+    if(typeof google!=='undefined'&&google.accounts){resolve();return;}
+    const script=document.createElement('script');
+    script.src='https://accounts.google.com/gsi/client';
+    script.onload=()=>{
+      // ライブラリが初期化されるまで少し待つ
+      let tries=0;
+      const check=setInterval(()=>{
+        tries++;
+        if(typeof google!=='undefined'&&google.accounts&&google.accounts.oauth2){
+          clearInterval(check);resolve();
+        }
+        if(tries>20){clearInterval(check);reject(new Error('Google認証の読み込みに失敗しました'));}
+      },200);
+    };
+    script.onerror=()=>reject(new Error('スクリプトの読み込みに失敗しました'));
+    document.head.appendChild(script);
   });
 }
-function signIn(){if(!tokenClient){toast('err','初期化中です。少し待ってから再試行してください。');return;}tokenClient.requestAccessToken();}
-function signOut(){if(accessToken)google.accounts.oauth2.revoke(accessToken);accessToken=null;currentUser=null;document.getElementById('login-screen').style.display='flex';document.getElementById('app-screen').style.display='none';}
+
+async function initApp(){
+  try{
+    await loadGoogleScript();
+    tokenClient=google.accounts.oauth2.initTokenClient({
+      client_id:CLIENT_ID,
+      scope:SCOPES,
+      callback:(resp)=>{
+        if(resp.error){toast('err','ログインに失敗しました: '+resp.error);return;}
+        accessToken=resp.access_token;
+        fetchUserInfo();
+      }
+    });
+    document.getElementById('btn-login').disabled=false;
+    document.getElementById('loading-msg').textContent='準備完了。ログインしてください。';
+  }catch(e){
+    document.getElementById('loading-msg').textContent='読み込みエラー: ページを再読み込みしてください。';
+    console.error(e);
+  }
+}
+
+function signIn(){
+  if(!tokenClient){toast('err','初期化中です。少しお待ちください。');return;}
+  tokenClient.requestAccessToken({prompt:'consent'});
+}
+
+function signOut(){
+  if(accessToken)google.accounts.oauth2.revoke(accessToken,()=>{});
+  accessToken=null;currentUser=null;
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('app-screen').style.display='none';
+  document.getElementById('loading-msg').textContent='準備完了。ログインしてください。';
+}
+
 async function fetchUserInfo(){
   try{
     const r=await fetch('https://www.googleapis.com/oauth2/v2/userinfo',{headers:{Authorization:`Bearer ${accessToken}`}});
+    if(!r.ok)throw new Error('userinfo取得失敗');
     currentUser=await r.json();
-    document.getElementById('header-name').textContent=currentUser.name||currentUser.email;
     const av=document.getElementById('header-avatar');
-    av.innerHTML=currentUser.picture?`<img src="${currentUser.picture}" alt="">`:(currentUser.name||'U').slice(0,1);
+    av.innerHTML=currentUser.picture?`<img src="${currentUser.picture}" alt="">`:esc((currentUser.name||'U').slice(0,1));
+    document.getElementById('header-name').textContent=currentUser.name||currentUser.email||'';
     document.getElementById('login-screen').style.display='none';
     document.getElementById('app-screen').style.display='block';
+    buildC1();buildC2();buildC3();updateResult();
     loadH();
-  }catch(e){toast('err','ユーザー情報の取得に失敗しました');}
+  }catch(e){
+    toast('err','ユーザー情報の取得に失敗しました');
+    console.error(e);
+  }
 }
-window.onload=()=>{google.accounts.id.initialize({client_id:CLIENT_ID});initGoogleAuth();};
+
+// 初期化
+initApp();
 
 function sw(t){
   document.getElementById('pane-up').style.display=t==='up'?'':'none';
@@ -263,6 +302,7 @@ function sw(t){
   document.getElementById('tb-hi').classList.toggle('on',t==='hi');
   if(t==='hi')loadH();
 }
+
 function buildC1(){document.getElementById('c1').innerHTML=MONTHS.map(m=>`<div class="fi${selM===m.id?' on':''}" onclick="pickM('${m.id}')">📅 ${esc(m.label)}</div>`).join('');}
 function buildC2(){
   const el=document.getElementById('c2');
@@ -304,15 +344,27 @@ function doDrop(e){e.preventDefault();document.getElementById('dz').classList.re
 function onFiles(e){addFiles([...e.target.files]);}
 function addFiles(fs){fs.forEach(f=>{if(f.size>50*1024*1024){toast('err',f.name+' は50MBを超えています');return;}if(!files.find(x=>x.name===f.name&&x.size===f.size))files.push(f);});renderFiles();updBtn();}
 function rmFile(i){files.splice(i,1);renderFiles();updBtn();}
-function renderFiles(){document.getElementById('fl').innerHTML=files.map((f,i)=>`<div class="fitem"><span class="fitem-icon">📄</span><div class="fitem-info"><div class="fitem-name">${esc(f.name)}</div><div class="fitem-size" id="fsize${i}">${fmtB(f.size)}</div></div><button class="frm" onclick="rmFile(${i})">✕</button></div>`).join('');}
+function renderFiles(){
+  document.getElementById('fl').innerHTML=files.map((f,i)=>`
+    <div class="fitem">
+      <span class="fitem-icon">📄</span>
+      <div class="fitem-info">
+        <div class="fitem-name">${esc(f.name)}</div>
+        <div class="fitem-meta" id="fmeta${i}">${fmtB(f.size)}</div>
+      </div>
+      <button class="frm" onclick="rmFile(${i})">✕</button>
+    </div>`).join('');
+}
 
 async function uploadToDrive(file,folderId){
   const metadata={name:file.name,parents:[folderId]};
   const form=new FormData();
   form.append('metadata',new Blob([JSON.stringify(metadata)],{type:'application/json'}));
   form.append('file',file);
-  const resp=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{method:'POST',headers:{Authorization:`Bearer ${accessToken}`},body:form});
-  if(!resp.ok){const err=await resp.json();throw new Error(err.error?.message||'アップロード失敗');}
+  const resp=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name',{
+    method:'POST',headers:{Authorization:`Bearer ${accessToken}`},body:form
+  });
+  if(!resp.ok){const err=await resp.json().catch(()=>({}));throw new Error(err.error?.message||`HTTP ${resp.status}`);}
   return await resp.json();
 }
 
@@ -326,14 +378,14 @@ async function doUp(){
   const results=[];
   for(let i=0;i<files.length;i++){
     const f=files[i];
-    const szEl=document.getElementById('fsize'+i);
-    if(szEl)szEl.innerHTML='<div class="pb"><div class="pf" style="width:60%"></div></div>';
+    const metaEl=document.getElementById('fmeta'+i);
+    if(metaEl)metaEl.innerHTML='<div class="pb"><div class="pf" style="width:60%"></div></div>';
     try{
       const df=await uploadToDrive(f,targetId);
-      if(szEl)szEl.innerHTML='<span class="fitem-status done">✅ 完了</span>';
+      if(metaEl)metaEl.innerHTML='<span class="fitem-status done">✅ 完了</span>';
       results.push({name:f.name,size:f.size,status:'success',driveId:df.id});
     }catch(e){
-      if(szEl)szEl.innerHTML=`<span class="fitem-status error">❌ ${e.message}</span>`;
+      if(metaEl)metaEl.innerHTML=`<span class="fitem-status error">❌ ${esc(e.message)}</span>`;
       results.push({name:f.name,size:f.size,status:'error',error:e.message});
     }
   }
@@ -342,18 +394,24 @@ async function doUp(){
   const cat=CATS.find(x=>x.key===selC);
   const cLabel=cat?.label||'',sLabel=cat?.subs?.find(s=>s.key===selS)?.label||'';
   const entry={id:Date.now(),ts:new Date().toISOString(),user:currentUser?.name||currentUser?.email||'不明',userPic:currentUser?.picture||'',path,month:mLabel,cat:cLabel,sub:sLabel,memo:document.getElementById('memo').value,files:results};
-  await loadH();hist.unshift(entry);
+  hist.unshift(entry);
   try{localStorage.setItem(SKEY,JSON.stringify(hist.slice(0,200)));}catch(e){}
   btn.disabled=false;btn.innerHTML='📤 アップロード';
-  if(ok===results.length){toast('ok',`${ok}件を「${sLabel||cLabel}」に保存しました`);setTimeout(()=>clearAll(),2000);}
-  else toast('err',`${ok}/${results.length}件成功（${results.length-ok}件失敗）`);
+  if(ok===results.length){toast('ok',`✅ ${ok}件を「${sLabel||cLabel}」に保存しました`);setTimeout(()=>clearAll(),2000);}
+  else toast('err',`⚠️ ${ok}/${results.length}件成功（${results.length-ok}件失敗）`);
+  updBtn();
 }
 
 function clearAll(){files=[];document.getElementById('fi').value='';document.getElementById('memo').value='';renderFiles();updBtn();}
 
-async function loadH(){try{hist=JSON.parse(localStorage.getItem(SKEY)||'[]');}catch(e){hist=[];}renderH();renderStats();refreshF();}
-function renderStats(){const total=hist.length,ftot=hist.reduce((s,h)=>s+(h.files?.length||0),0),users=new Set(hist.map(h=>h.user).filter(Boolean)).size;document.getElementById('stats').innerHTML=`<div class="sc"><div class="sl">総アップロード</div><div class="sv">${total}</div></div><div class="sc"><div class="sl">ファイル数</div><div class="sv">${ftot}</div></div><div class="sc"><div class="sl">担当者数</div><div class="sv">${users}</div></div>`;}
-function refreshF(){const months=[...new Set(hist.map(h=>h.month).filter(Boolean))],cats=[...new Set(hist.map(h=>h.cat).filter(Boolean))],users=[...new Set(hist.map(h=>h.user).filter(Boolean))];['f1','f2','f3'].forEach((id,i)=>{const arr=[months,cats,users][i],ph=['全月','全カテゴリ','全スタッフ'][i],el=document.getElementById(id),prev=el.value;el.innerHTML=`<option value="">${ph}</option>`+arr.map(v=>`<option${v===prev?' selected':''}>${esc(v)}</option>`).join('');});}
+function loadH(){try{hist=JSON.parse(localStorage.getItem(SKEY)||'[]');}catch(e){hist=[];}renderH();renderStats();refreshF();}
+function renderStats(){const t=hist.length,f=hist.reduce((s,h)=>s+(h.files?.length||0),0),u=new Set(hist.map(h=>h.user).filter(Boolean)).size;document.getElementById('stats').innerHTML=`<div class="sc"><div class="sl">総アップロード</div><div class="sv">${t}</div></div><div class="sc"><div class="sl">ファイル数</div><div class="sv">${f}</div></div><div class="sc"><div class="sl">担当者数</div><div class="sv">${u}</div></div>`;}
+function refreshF(){
+  const months=[...new Set(hist.map(h=>h.month).filter(Boolean))];
+  const cats=[...new Set(hist.map(h=>h.cat).filter(Boolean))];
+  const users=[...new Set(hist.map(h=>h.user).filter(Boolean))];
+  ['f1','f2','f3'].forEach((id,i)=>{const arr=[months,cats,users][i],ph=['全月','全カテゴリ','全スタッフ'][i],el=document.getElementById(id),prev=el.value;el.innerHTML=`<option value="">${ph}</option>`+arr.map(v=>`<option${v===prev?' selected':''}>${esc(v)}</option>`).join('');});
+}
 function renderH(){
   const fm=document.getElementById('f1').value,fc=document.getElementById('f2').value,fu=document.getElementById('f3').value,fq=document.getElementById('fq').value.toLowerCase();
   let items=hist;
@@ -363,16 +421,14 @@ function renderH(){
   el.innerHTML=items.slice(0,50).map(h=>{
     const dt=new Date(h.ts).toLocaleDateString('ja-JP',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
     const ok=h.files?.filter(f=>f.status==='success').length||0,tot=h.files?.length||0,dest=h.sub||h.cat||'不明';
-    const avContent=h.userPic?`<img src="${h.userPic}" alt="">`:esc((h.user||'?').slice(0,1));
-    return`<div class="hi"><div class="hav">${avContent}</div><div class="hb"><div class="ht">${esc(dest)}</div><div class="hm"><strong>${esc(h.user||'不明')}</strong><span>${esc(h.month||'')}</span><span>${dt}</span><span class="badge ${ok===tot?'ok':'err'}">${ok}/${tot}件</span></div><div class="hp">📁 ${esc(h.path||'')}</div>${h.memo?`<div style="font-size:12px;color:var(--text2);margin-top:4px">💬 ${esc(h.memo)}</div>`:''}<div class="hfs">${(h.files||[]).slice(0,5).map(f=>`<span class="chip">${esc(f.name)}</span>`).join('')}${(h.files?.length||0)>5?`<span class="chip">+${h.files.length-5}件</span>`:''}</div></div></div>`;
+    const av=h.userPic?`<img src="${h.userPic}" alt="">`:esc((h.user||'?').slice(0,1));
+    return`<div class="hi"><div class="hav">${av}</div><div class="hb"><div class="ht">${esc(dest)}</div><div class="hm"><strong>${esc(h.user||'不明')}</strong><span>${esc(h.month||'')}</span><span>${dt}</span><span class="badge ${ok===tot?'ok':'err'}">${ok}/${tot}件</span></div><div class="hp">📁 ${esc(h.path||'')}</div>${h.memo?`<div style="font-size:12px;color:var(--text2);margin-top:4px">💬 ${esc(h.memo)}</div>`:''}<div class="hfs">${(h.files||[]).slice(0,5).map(f=>`<span class="chip">${esc(f.name)}</span>`).join('')}${(h.files?.length||0)>5?`<span class="chip">+${h.files.length-5}件</span>`:''}</div></div></div>`;
   }).join('');
 }
 
-function toast(type,msg){const w=document.getElementById('tw'),d=document.createElement('div');d.className=`toast ${type}`;d.textContent=msg;w.appendChild(d);setTimeout(()=>d.remove(),4000);}
+function toast(type,msg){const w=document.getElementById('tw'),d=document.createElement('div');d.className=`toast ${type}`;d.textContent=msg;w.appendChild(d);setTimeout(()=>d.remove(),4500);}
 function fmtB(b){if(b<1024)return b+'B';if(b<1048576)return Math.round(b/1024)+'KB';return(b/1048576).toFixed(1)+'MB';}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-
-buildC1();buildC2();buildC3();updateResult();
 </script>
 </body>
 </html>
