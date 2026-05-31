@@ -18,17 +18,14 @@
   .btn-signout{padding:3px 10px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:white;color:var(--text2);font-size:12px;cursor:pointer;font-family:inherit}
   .btn-signout:hover{background:var(--bg)}
 
-  /* ログイン画面 */
-  .login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg)}
-  .login-card{background:white;border:1px solid var(--border);border-radius:16px;padding:3rem 2.5rem;text-align:center;max-width:400px;width:90%;box-shadow:var(--shadow2)}
-  .login-logo{width:56px;height:56px;background:var(--accent);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px;color:white;margin:0 auto 1.5rem}
-  .login-title{font-size:20px;font-weight:700;margin-bottom:8px}
-  .login-sub{font-size:13px;color:var(--text2);margin-bottom:2rem;line-height:1.7}
-  .btn-google{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px 20px;border:1.5px solid var(--border2);border-radius:var(--radius);background:white;color:var(--text);font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-  .btn-google:hover{background:var(--bg);box-shadow:var(--shadow)}
-  .btn-google:disabled{opacity:.5;cursor:not-allowed}
-  .btn-google svg{width:18px;height:18px;flex-shrink:0}
-  .login-status{font-size:13px;color:var(--text3);margin-top:1rem;min-height:20px}
+  /* ローディング画面 */
+  .loading-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg)}
+  .loading-card{background:white;border:1px solid var(--border);border-radius:16px;padding:3rem 2.5rem;text-align:center;max-width:400px;width:90%;box-shadow:var(--shadow2)}
+  .loading-logo{width:56px;height:56px;background:var(--accent);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px;color:white;margin:0 auto 1.5rem}
+  .loading-title{font-size:18px;font-weight:700;margin-bottom:8px}
+  .loading-sub{font-size:13px;color:var(--text2);margin-bottom:1.5rem;line-height:1.7}
+  .sp-lg{display:inline-block;width:28px;height:28px;border:3px solid var(--accent-bg);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
 
   .main{max-width:720px;margin:0 auto;padding:2rem 1.5rem}
   .tabs{display:flex;border-bottom:1.5px solid var(--border);margin-bottom:1.5rem}
@@ -105,23 +102,18 @@
   .badge.err{background:var(--danger-bg);color:var(--danger)}
   .empty{text-align:center;padding:3rem;color:var(--text3)}
   .sp{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
   @media(max-width:600px){.fcols{grid-template-columns:1fr}.fcol{border-right:none;border-bottom:1px solid var(--border)}.sg{grid-template-columns:1fr 1fr}.header{padding:0 1rem}.main{padding:1.25rem 1rem}}
 </style>
 </head>
 <body>
 
-<!-- ログイン画面 -->
-<div id="login-screen" class="login-screen">
-  <div class="login-card">
-    <div class="login-logo">📁</div>
-    <div class="login-title">経理書類アップロード</div>
-    <div class="login-sub">MARKELINEの経理書類を<br>Google Driveへ安全にアップロード</div>
-    <button class="btn-google" id="btn-login" onclick="signIn()" disabled>
-      <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-      Googleアカウントでログイン
-    </button>
-    <div class="login-status" id="login-status">読み込み中...</div>
+<!-- ローディング画面（認証中に表示） -->
+<div id="loading-screen" class="loading-screen">
+  <div class="loading-card">
+    <div class="loading-logo">📁</div>
+    <div class="loading-title">MARKELINE 経理アップロード</div>
+    <div class="loading-sub" id="loading-msg">Googleアカウントを確認中...</div>
+    <div class="sp-lg"></div>
   </div>
 </div>
 
@@ -191,8 +183,10 @@
 
 <script>
 const CLIENT_ID='517894712902-snug0s0mnhrjli3t0k1730p4cdgt6ttc.apps.googleusercontent.com';
+const REDIRECT_URI=location.origin+location.pathname;
 const SCOPES='https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email';
-const SKEY='keiri-hist-v12';
+const SKEY='keiri-hist-v13';
+const TOKEN_KEY='keiri-token-v1';
 
 const MONTHS=[
   {id:'1lK_aKf8oEY_8cutEHVqgYu5TVn3XHLn2',label:'R8.7'},
@@ -221,104 +215,107 @@ const FIDS={
   '1lK_aKf8oEY_8cutEHVqgYu5TVn3XHLn2':{'1':'1JYhmz296mZ3HrN69oxr3YxRq9uOnT6TL','2':'1-7xp-Eq-T8Io-JYmCG4jZp-47FOGI1eK','3':'1nExnExJ-NXfj8TezF06pGFkynnKMpnAL','4':'14-5Uq7310BNdlIm_Jc13kpnbhVBgkld6','4a':'1j12t_i5P9J6x82A6neIMDIKKwwI1Wawy','4b':'1Y09fxfnShHEKpPqz8BkeDOhzX4smdQoX','4c':'1W51iZJtkxQd8CU9HRqgKWZDboW7MT7z5','5':'1EBjdgv357HfHi32j-T2hfecaWK0JfUeR','5a':'1hOCQ5fp9q1pV9brm6Be4ovvQVhMUHPww','5b':'11QDB-pQdhiZww-bGSQEvlqfT1NYlNVJA','6':'1W75gVk4CVh2GudEYEesk2lqlHoQwcUoc','6a':'1u8CA2MpT3p-S3E-_nbPpGQ31wlw6CHhG','6b':'1Cf3nAXAbP01GS8cGifEgFM32ULRZBDy7','6c':'1KOucB2FeFYJKAzQTMXln-j1UiW7r6Ag1','7':'1HoDIqxMpHnjBHtDDllBOLI-O_4VlwwHR','8':'14xwZwjDPveFnvClU-6GF1z04KT5cI16l','9':'1zG_LsTEkf9BETcmPMgx3eCvjHZTGd1H-','10':'13Q3V30I_VttBi2nz9uPKRPk2cV9jXlwR','11':'1V1I9ONMyHJw_DyFY3rlDWst0tnPr94hU','12':'1LxLFhALLw42HovfURImcJgPr8yFLotDY','13':'1JFyWRhoaaK0kxaAwgMt4u6gGlRN7aPPU','14':'1DY_SFvlBLs0sLWEEwiic5d08ehS1YekC'},
 };
 
-let tokenClient=null,accessToken=null,currentUser=null;
+let accessToken=null,tokenExpiry=0,currentUser=null;
 let selM=null,selC=null,selS=null,files=[],hist=[];
-let tokenExpiry=0;
 
-// ---- Google認証（サイレント自動更新） ----
-function loadGoogleScript(){
-  return new Promise((resolve,reject)=>{
-    const script=document.createElement('script');
-    script.src='https://accounts.google.com/gsi/client';
-    script.onload=()=>{
-      const check=setInterval(()=>{
-        if(typeof google!=='undefined'&&google.accounts?.oauth2){clearInterval(check);resolve();}
-      },100);
-      setTimeout(()=>{clearInterval(check);reject(new Error('timeout'));},10000);
-    };
-    script.onerror=reject;
-    document.head.appendChild(script);
+// ---- リダイレクト方式OAuth ----
+function getAuthUrl(){
+  const state=Math.random().toString(36).slice(2);
+  sessionStorage.setItem('oauth_state',state);
+  const params=new URLSearchParams({
+    client_id:CLIENT_ID,
+    redirect_uri:REDIRECT_URI,
+    response_type:'token',
+    scope:SCOPES,
+    state,
+    include_granted_scopes:'true',
   });
+  return 'https://accounts.google.com/o/oauth2/v2/auth?'+params.toString();
 }
 
-async function initAuth(){
-  try{
-    await loadGoogleScript();
-    tokenClient=google.accounts.oauth2.initTokenClient({
-      client_id:CLIENT_ID,
-      scope:SCOPES,
-      callback:(resp)=>{
-        if(resp.error){
-          setStatus('ログインが必要です');
-          document.getElementById('btn-login').disabled=false;
-          return;
-        }
-        accessToken=resp.access_token;
-        tokenExpiry=Date.now()+(55*60*1000); // 55分
-        fetchUserInfo();
-      }
-    });
-    // サイレントログイン試行（ユーザーに画面を見せずに自動認証）
-    setStatus('自動ログインを試みています...');
-    tokenClient.requestAccessToken({prompt:''});
-  }catch(e){
-    setStatus('読み込みエラー。ページを再読み込みしてください。');
-    console.error(e);
-  }
-}
-
-// トークンが切れそうなら自動更新
-async function ensureToken(){
-  if(accessToken && Date.now() < tokenExpiry) return;
-  // サイレントで再取得
-  return new Promise((resolve,reject)=>{
-    const origCallback=tokenClient.callback;
-    tokenClient.callback=(resp)=>{
-      tokenClient.callback=origCallback;
-      if(resp.error){reject(new Error(resp.error));return;}
-      accessToken=resp.access_token;
-      tokenExpiry=Date.now()+(55*60*1000);
-      resolve();
-    };
-    tokenClient.requestAccessToken({prompt:''});
-  });
-}
-
-function signIn(){
-  if(!tokenClient)return;
-  tokenClient.requestAccessToken({prompt:'select_account'});
+function redirectToGoogle(){
+  setMsg('Googleログインページへ移動します...');
+  setTimeout(()=>{location.href=getAuthUrl();},500);
 }
 
 function signOut(){
-  if(accessToken)google.accounts.oauth2.revoke(accessToken,()=>{});
-  accessToken=null;currentUser=null;tokenExpiry=0;
-  document.getElementById('app-screen').style.display='none';
-  document.getElementById('login-screen').style.display='flex';
-  document.getElementById('btn-login').disabled=false;
-  setStatus('ログアウトしました。再度ログインしてください。');
+  accessToken=null;tokenExpiry=0;currentUser=null;
+  localStorage.removeItem(TOKEN_KEY);
+  sessionStorage.removeItem('oauth_state');
+  redirectToGoogle();
 }
 
-function setStatus(msg){document.getElementById('login-status').textContent=msg;}
+function setMsg(m){document.getElementById('loading-msg').textContent=m;}
 
-async function fetchUserInfo(){
+function saveToken(token,expiresIn){
+  const expiry=Date.now()+(parseInt(expiresIn||3600)-120)*1000;
+  localStorage.setItem(TOKEN_KEY,JSON.stringify({token,expiry}));
+  accessToken=token;tokenExpiry=expiry;
+}
+
+function loadToken(){
   try{
-    const r=await fetch('https://www.googleapis.com/oauth2/v2/userinfo',{headers:{Authorization:`Bearer ${accessToken}`}});
+    const d=JSON.parse(localStorage.getItem(TOKEN_KEY)||'null');
+    if(d&&d.token&&d.expiry>Date.now()+60000){
+      accessToken=d.token;tokenExpiry=d.expiry;return true;
+    }
+  }catch(e){}
+  return false;
+}
+
+async function init(){
+  // URLにトークンが含まれているか確認（リダイレクト後）
+  const hash=location.hash.slice(1);
+  if(hash){
+    const params=new URLSearchParams(hash);
+    const token=params.get('access_token');
+    const expiresIn=params.get('expires_in');
+    const state=params.get('state');
+    const savedState=sessionStorage.getItem('oauth_state');
+    // URLからhashを消す
+    history.replaceState(null,'',location.pathname);
+    if(token&&state&&state===savedState){
+      saveToken(token,expiresIn);
+      await fetchUserAndStart();
+      return;
+    }
+  }
+  // localStorageにトークンがあるか確認
+  if(loadToken()){
+    await fetchUserAndStart();
+    return;
+  }
+  // なければGoogleへリダイレクト
+  redirectToGoogle();
+}
+
+async function fetchUserAndStart(){
+  try{
+    setMsg('ユーザー情報を取得中...');
+    const r=await fetch('https://www.googleapis.com/oauth2/v2/userinfo',{
+      headers:{Authorization:`Bearer ${accessToken}`}
+    });
     if(!r.ok)throw new Error('userinfo失敗');
     currentUser=await r.json();
     const av=document.getElementById('header-avatar');
     if(currentUser.picture){av.innerHTML=`<img src="${currentUser.picture}" alt="">`;}
     else{av.textContent=(currentUser.name||'U').slice(0,1);}
     document.getElementById('header-name').textContent=currentUser.name||currentUser.email||'';
-    document.getElementById('login-screen').style.display='none';
+    document.getElementById('loading-screen').style.display='none';
     document.getElementById('app-screen').style.display='block';
     buildC1();buildC2();buildC3();updateResult();
     loadH();
-    // 54分後に自動でトークン更新
-    setTimeout(()=>ensureToken().catch(()=>{}),54*60*1000);
+    // トークンの残り時間が30分切ったら自動リフレッシュ
+    const remaining=tokenExpiry-Date.now();
+    if(remaining>0){
+      setTimeout(()=>{
+        localStorage.removeItem(TOKEN_KEY);
+        redirectToGoogle();
+      },remaining);
+    }
   }catch(e){
-    setStatus('ユーザー情報の取得に失敗しました。ログインしてください。');
-    document.getElementById('btn-login').disabled=false;
-    console.error(e);
+    localStorage.removeItem(TOKEN_KEY);
+    redirectToGoogle();
   }
 }
 
@@ -363,7 +360,7 @@ function updateResult(){
   if(path){el.className='fresult set';el.innerHTML=`✅ <span class="path">${esc(path)}</span>`;}
   else{el.className='fresult';const cat=CATS.find(c=>c.key===selC);const msg=!selM?'月・カテゴリを選択してください':!selC?'カテゴリを選択してください':(cat&&cat.subs&&!selS)?'詳細フォルダを選択してください':'月・カテゴリを選択してください';el.innerHTML=`📁 <span style="color:var(--text3)">${msg}</span>`;}
 }
-function updBtn(){document.getElementById('upbtn').disabled=!files.length||!getPath()||!accessToken;}
+function updBtn(){document.getElementById('upbtn').disabled=!files.length||!getPath();}
 
 // ---- ファイル操作 ----
 function doDrag(e){e.preventDefault();document.getElementById('dz').classList.add('over');}
@@ -386,7 +383,6 @@ function renderFiles(){
 
 // ---- Drive アップロード ----
 async function uploadToDrive(file,folderId){
-  await ensureToken();
   const metadata={name:file.name,parents:[folderId]};
   const form=new FormData();
   form.append('metadata',new Blob([JSON.stringify(metadata)],{type:'application/json'}));
@@ -399,7 +395,6 @@ async function uploadToDrive(file,folderId){
 }
 
 async function doUp(){
-  if(!accessToken){toast('err','ログインが必要です');return;}
   const path=getPath(),targetId=getTargetId();
   if(!path||!targetId){toast('err','保存先フォルダを選択してください');return;}
   if(!files.length){toast('err','ファイルを選択してください');return;}
@@ -459,7 +454,7 @@ function toast(type,msg){const w=document.getElementById('tw'),d=document.create
 function fmtB(b){if(b<1024)return b+'B';if(b<1048576)return Math.round(b/1024)+'KB';return(b/1048576).toFixed(1)+'MB';}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
-initAuth();
+init();
 </script>
 </body>
 </html>
