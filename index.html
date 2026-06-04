@@ -425,18 +425,20 @@ async function doUp(){
   try{localStorage.setItem(SKEY,JSON.stringify(hist.slice(0,200)));}catch(e){}
 
   // GASにデータ送信（スプレッドシート記録＋ChatWork通知）
-  try{
-    fetch(GAS_URL,{
-      method:'POST',
-      body:JSON.stringify({
-        userName:currentUser?.name||'不明',
-        userEmail:currentUser?.email||'—',
-        timestamp:new Date().toISOString(),
-        path,memo:memo||'—',
-        files:results,
-      }),
-    });
-  }catch(e){console.warn('GAS送信エラー',e);}
+try{
+  const formData = new FormData();
+  formData.append('contents', JSON.stringify({
+    userName:currentUser?.name||'不明',
+    userEmail:currentUser?.email||'—',
+    timestamp:new Date().toISOString(),
+    path,memo:memo||'—',
+    files:results,
+  }));
+  fetch(GAS_URL, {
+    method:'POST',
+    body: formData,
+  });
+}catch(e){console.warn('GAS送信エラー',e);}
 
   btn.disabled=false;btn.innerHTML='📤 アップロード';
   if(ok===results.length){toast('ok',`✅ ${ok}件を「${sLabel||cLabel}」に保存しました`);setTimeout(()=>clearAll(),2000);}
