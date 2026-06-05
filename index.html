@@ -433,7 +433,8 @@ async function doUp(){
       path,memo:memo||'—',
       files:results,
     });
-    fetch(GAS_URL+'?contents='+encodeURIComponent(payload),{method:'GET',mode:'no-cors'});
+    const img=new Image();
+    img.src=GAS_URL+'?contents='+encodeURIComponent(payload);
   }catch(e){console.warn('GAS送信エラー',e);}
 
   btn.disabled=false;btn.innerHTML='📤 アップロード';
