@@ -594,10 +594,9 @@ async function resolveTargetFolderId(){
       return {id:fid||FOLDERS.invoice.general_client, path:`1. 請求書 / クライアントへ発行分 / 一般 / ${monthStr}`, mirror:null};
     }
     if(direction==='received'){
-      // リスキリング助成金関連（両フォルダ同時保存）
-      const fid=await findOrNoteMonthFolder(FOLDERS.invoice.reskilling, monthStr.replace('月分','月分'));
-      const mid=await findOrNoteMonthFolder(FOLDERS.invoice.reskilling_mirror, monthStr);
-      return {id:fid||FOLDERS.invoice.reskilling, path:`1. 請求書 / リスキリング助成金関連 / ${monthStr}`, mirror:mid||FOLDERS.invoice.reskilling_mirror};
+      // 外注先・スタッフからMARKELINEへの請求書 → 株式会社MARKELINE / 月別
+      const fid=await findOrNoteMonthFolder(FOLDERS.invoice.markeline, monthStr);
+      return {id:fid||FOLDERS.invoice.markeline, path:`1. 請求書 / 株式会社MARKELINE / ${monthStr}`, mirror:null};
     }
   }
 
