@@ -570,7 +570,7 @@ function showDateStep(){
 function showInvoiceSubSelect(){
   document.getElementById('sub-select-title').textContent='どのフォルダに入れますか？';
   const grid=document.getElementById('sub-select-grid');
- grid.innerHTML=`
+  grid.innerHTML=`
     <button class="opt-btn" onclick="setInvoiceSub('direct','月フォルダ直下')">
       <span class="opt-icon">📅</span><div class="opt-text">月フォルダ直下<div class="opt-sub">サブフォルダなし</div></div>
     </button>
@@ -585,6 +585,7 @@ function showInvoiceSubSelect(){
   hide('step4-card');hide('step5-card');hide('step6-card');
   document.getElementById('dest-preview-wrap').style.display='none';
 }
+
 function setInvoiceSub(type, label){
   sel.subFolder=type;
   document.querySelectorAll('#sub-select-grid .opt-btn').forEach(b=>b.classList.remove('on'));
@@ -731,34 +732,34 @@ async function resolveTargetFolderId(){
   if(docType==='estimate'){
     const folder=direction==='received'?FOLDERS.estimate.received:FOLDERS.estimate.issued;
     const label=direction==='received'?'MARKELINE受取分':'MARKELINE発行分';
-    const fid=await findOrNoteMonthFolder(folder, monthStr);
+    const fid=await findOrNoteYearThenMonth(folder, monthStr);
     return {id:fid||folder, path:`4. 見積書 / ${label} / ${monthStr}`, mirror:null};
   }
   // 5. 発注書（発行・受取で月別フォルダ）
   if(docType==='order'){
     const folder=direction==='received'?FOLDERS.order.received:FOLDERS.order.issued;
     const label=direction==='received'?'MARKELINE受取分':'MARKELINE発行分';
-    const fid=await findOrNoteMonthFolder(folder, monthStr);
+    const fid=await findOrNoteYearThenMonth(folder, monthStr);
     return {id:fid||folder, path:`5. 発注書 / ${label} / ${monthStr}`, mirror:null};
   }
   // 6. 納品書（発行・受取で月別フォルダ）
   if(docType==='delivery'){
     const folder=direction==='received'?FOLDERS.delivery.received:FOLDERS.delivery.issued;
     const label=direction==='received'?'MARKELINE受取分':'MARKELINE発行分';
-    const fid=await findOrNoteMonthFolder(folder, monthStr);
+    const fid=await findOrNoteYearThenMonth(folder, monthStr);
     return {id:fid||folder, path:`6. 納品書 / ${label} / ${monthStr}`, mirror:null};
   }
   // 8. 申込書（発行・受取で月別フォルダ）
   if(docType==='application'){
     const folder=direction==='received'?FOLDERS.application.received:FOLDERS.application.issued;
     const label=direction==='received'?'MARKELINE受取分':'MARKELINE発行分';
-    const fid=await findOrNoteMonthFolder(folder, monthStr);
+    const fid=await findOrNoteYearThenMonth(folder, monthStr);
     return {id:fid||folder, path:`8. 申込書 / ${label} / ${monthStr}`, mirror:null};
   }
 
   // 10. その他 → 年→月別
   if(docType==='other'){
-    const fid=await findOrNoteMonthFolder(FOLDERS.other, monthStr);
+    const fid=await findOrNoteYearThenMonth(FOLDERS.other, monthStr);
     return {id:fid||FOLDERS.other, path:`10. その他 / ${monthStr}`, mirror:null};
   }
 
@@ -767,7 +768,7 @@ async function resolveTargetFolderId(){
 
   // 12. 追加資料
   if(docType==='additional'){
-    const fid=await findOrNoteMonthFolder(FOLDERS.additional, monthStr);
+    const fid=await findOrNoteYearThenMonth(FOLDERS.additional, monthStr);
     return {id:fid||FOLDERS.additional, path:`12. 追加資料 / ${monthStr}`, mirror:null};
   }
 
@@ -778,17 +779,19 @@ async function resolveTargetFolderId(){
   if(docType==='invoice'){
     if(direction==='received'){
       // 株式会社MARKELINE / 月別 / サブフォルダ
-      const monthFid=await findOrNoteMonthFolder(FOLDERS.invoice.markeline, monthStr);
+      const monthFid=await findOrNoteYearThenMonth(FOLDERS.invoice.markeline, monthStr);
       const mfid=monthFid||FOLDERS.invoice.markeline;
       // サブフォルダID取得
       const subMap={
-        'mama': 'ママさん請求書',
+        'direct': null,
         'gaibunin': '外部委託',
         'gaibunin_paid': '外部委託',
-        'video': '動画制作',
-        'lstep': 'Lステップ',
       };
       const subName=subMap[sel.subFolder];
+      if(sel.subFolder==='direct'||subName===null){
+        // 月フォルダ直下
+        return {id:mfid, path:`1. 請求書 / 株式会社MARKELINE / ${monthStr}`, mirror:null};
+      }
       if(subName){
         // 月フォルダ内のサブフォルダを検索
         const subFid=await findOrNoteSubFolder(mfid, subName);
@@ -808,13 +811,13 @@ async function resolveTargetFolderId(){
     if(direction==='issued'){
       if(sel.invoiceType==='reskilling'){
         // リスキリング → 年フォルダ → 月フォルダ（動的取得）
-        const fid=await findOrNoteMonthFolder(FOLDERS.invoice.reskilling, monthStr);
-        const mid=await findOrNoteMonthFolder(FOLDERS.invoice.reskilling_mirror, monthStr);
+        const fid=await findOrNoteYearThenMonth(FOLDERS.invoice.reskilling, monthStr);
+        const mid=await findOrNoteYearThenMonth(FOLDERS.invoice.reskilling_mirror, monthStr);
         return {id:fid||FOLDERS.invoice.reskilling, path:`1. 請求書 / クライアントへ発行分 / リスキリング助成金関連 / ${monthStr}`, mirror:mid||FOLDERS.invoice.reskilling_mirror};
       }
       if(sel.invoiceType==='general'){
         // 一般 → 年→月別（動的取得）
-        const fid=await findOrNoteMonthFolder(FOLDERS.invoice.general_client, monthStr);
+        const fid=await findOrNoteYearThenMonth(FOLDERS.invoice.general_client, monthStr);
         return {id:fid||FOLDERS.invoice.general_client, path:`1. 請求書 / クライアントへ発行分 / 一般の請求書 / ${monthStr}`, mirror:null};
       }
       return null;
@@ -830,15 +833,15 @@ async function resolveTargetFolderId(){
       return {id:sel.subFolderId, path:`2. 契約書 / ${labels[sel.subFolder]||sel.subFolder}`, mirror:null};
     }
     if(direction==='internal'){
-      const fid=await findOrNoteMonthFolder(FOLDERS.contract.staff, monthStr);
+      const fid=await findOrNoteYearThenMonth(FOLDERS.contract.staff, monthStr);
       return {id:fid||FOLDERS.contract.staff, path:`2. 契約書 / 社内MARKELINEスタッフ / ${monthStr}`, mirror:null};
     }
     if(direction==='issued'){
-      const fid=await findOrNoteMonthFolder(FOLDERS.contract.client, monthStr);
+      const fid=await findOrNoteYearThenMonth(FOLDERS.contract.client, monthStr);
       return {id:fid||FOLDERS.contract.client, path:`2. 契約書 / クライアントへの発行 / ${monthStr}`, mirror:null};
     }
     if(direction==='received'){
-      const fid=await findOrNoteMonthFolder(FOLDERS.contract.received, monthStr);
+      const fid=await findOrNoteYearThenMonth(FOLDERS.contract.received, monthStr);
       return {id:fid||FOLDERS.contract.received, path:`2. 契約書 / 弊社が対応分 / ${monthStr}`, mirror:null};
     }
   }
@@ -846,11 +849,11 @@ async function resolveTargetFolderId(){
   // 3. 領収書
   if(docType==='receipt'){
     if(direction==='issued'){
-      const fid=await findOrNoteMonthFolder(FOLDERS.receipt.issued, monthStr);
+      const fid=await findOrNoteYearThenMonth(FOLDERS.receipt.issued, monthStr);
       return {id:fid||FOLDERS.receipt.issued, path:`3. 領収書 / MARKELINE発行分 / ${monthStr}`, mirror:null};
     }
     if(direction==='received'){
-      const fid=await findOrNoteMonthFolder(FOLDERS.receipt.paid, monthStr);
+      const fid=await findOrNoteYearThenMonth(FOLDERS.receipt.paid, monthStr);
       return {id:fid||FOLDERS.receipt.paid, path:`3. 領収書 / MARKELINE支払い分 / ${monthStr}`, mirror:null};
     }
     if(direction==='internal'){
@@ -859,6 +862,14 @@ async function resolveTargetFolderId(){
   }
 
   return null;
+}
+
+// 年フォルダ→月フォルダの順で取得
+async function findOrNoteYearThenMonth(parentId, monthStr){
+  const year=monthStr.substring(0,4)+'年';
+  const yearFid=await findOrNoteSubFolder(parentId, year);
+  if(!yearFid) return null;
+  return await findOrNoteMonthFolder(yearFid, monthStr);
 }
 
 // Drive APIでサブフォルダIDを取得
