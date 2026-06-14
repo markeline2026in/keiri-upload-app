@@ -29,38 +29,33 @@ body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text
 .tab.on{color:var(--accent);border-bottom-color:var(--accent)}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
 .card-title{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
-/* Steps */
 .step{margin-bottom:1rem}
 .step-label{font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;display:flex;align-items:center;gap:8px}
 .step-num{width:22px;height:22px;background:var(--accent);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
 .step-num.done{background:var(--success)}
 .step-num.skip{background:var(--text3)}
-/* 選択ボタングリッド */
 .opt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
 .opt-grid.col2{grid-template-columns:repeat(2,1fr)}
 .opt-grid.col3{grid-template-columns:repeat(3,1fr)}
 .opt-btn{display:flex;align-items:flex-start;gap:8px;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:white;color:var(--text);font-size:13px;font-weight:500;cursor:pointer;text-align:left;transition:all .15s;font-family:inherit;line-height:1.4}
 .opt-btn:hover{border-color:var(--accent);background:var(--accent-bg);color:var(--accent)}
 .opt-btn.on{border-color:var(--accent);background:var(--accent-bg);color:var(--accent)}
+.opt-btn:disabled{opacity:.45;cursor:not-allowed}
 .opt-btn .opt-icon{font-size:18px;flex-shrink:0;margin-top:1px}
 .opt-btn .opt-text{flex:1}
 .opt-btn .opt-sub{font-size:11px;color:var(--text3);font-weight:400;margin-top:2px}
 .opt-btn.on .opt-sub{color:var(--accent);opacity:.7}
-/* 日付 */
 .date-wrap{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.date-radio{display:flex;gap:8px}
+.date-radio{display:flex;gap:8px;flex-wrap:wrap}
 .dopt{display:flex;align-items:center;gap:6px;padding:9px 16px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:white;cursor:pointer;font-size:13px;font-weight:500;color:var(--text);transition:all .15s}
 .dopt:hover{border-color:var(--accent);background:var(--accent-bg)}
 .dopt.on{border-color:var(--accent);background:var(--accent-bg);color:var(--accent)}
 .dopt input[type=radio]{display:none}
-/* テキスト入力 */
 input[type=text],input[type=month]{width:100%;font-size:14px;font-family:inherit;border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;background:var(--bg);color:var(--text);outline:none;transition:border-color .15s}
 input[type=text]:focus,input[type=month]:focus{border-color:var(--accent);background:white}
-/* 結果プレビュー */
 .dest-preview{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg);font-size:13px;margin-top:12px;min-height:44px}
 .dest-preview.set{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
 .dest-preview.warn{background:#fff8e6;border-color:#e6a800;color:#856000}
-/* ファイル */
 .dz{border:2px dashed var(--border2);border-radius:var(--radius);padding:1.5rem;text-align:center;cursor:pointer;background:var(--bg);position:relative;transition:all .2s}
 .dz:hover,.dz.over{border-color:var(--accent);background:var(--accent-bg)}
 .dz input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
@@ -86,7 +81,6 @@ textarea:focus{border-color:var(--accent);background:white}
 .toast.ok{background:var(--success);color:white}
 .toast.err{background:var(--danger);color:white}
 @keyframes slideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-/* 履歴 */
 .sg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.25rem}
 .sc{background:white;border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;box-shadow:var(--shadow)}
 .sl{font-size:12px;color:var(--text3);margin-bottom:4px}
@@ -140,14 +134,10 @@ textarea:focus{border-color:var(--accent);background:white}
       <button class="tab" id="tb-hi" onclick="sw('hi')">📋 自分の履歴</button>
     </div>
 
-    <!-- アップロードパネル -->
     <div id="pane-up">
-
-      <!-- STEP 1: 書類の種類 -->
       <div class="card">
         <div class="step-label"><div class="step-num" id="sn1">1</div>書類の種類を選んでください</div>
         <div class="opt-grid col3" id="doc-type-grid"></div>
-        <!-- IT導入補助金サブ選択 -->
         <div id="it-sub" style="display:none;margin-top:12px">
           <div class="divider"></div>
           <div style="font-size:12px;color:var(--text3);margin-bottom:8px;font-weight:600">📋 IT導入補助金 ― 書類の詳細を選んでください</div>
@@ -155,29 +145,27 @@ textarea:focus{border-color:var(--accent);background:white}
         </div>
       </div>
 
-      <!-- STEP 2: 書類の方向性 -->
       <div class="card" id="step2-card" style="display:none">
         <div class="step-label"><div class="step-num" id="sn2">2</div>この書類は誰から誰へのものですか？</div>
         <div class="opt-grid col3" id="direction-grid">
-          <button class="opt-btn" onclick="setDirection('issued')">
+          <button class="opt-btn" onclick="setDirection('issued', event)">
             <span class="opt-icon">📤</span>
             <div class="opt-text">MARKELINEが発行した<div class="opt-sub">クライアントへ出した</div></div>
           </button>
-          <button class="opt-btn" onclick="setDirection('internal')">
+          <button class="opt-btn" onclick="setDirection('internal', event)">
             <span class="opt-icon">🏢</span>
             <div class="opt-text">社内の書類<div class="opt-sub">スタッフ・社内向け</div></div>
           </button>
-          <button class="opt-btn" onclick="setDirection('received')">
+          <button class="opt-btn" onclick="setDirection('received', event)">
             <span class="opt-icon">📥</span>
             <div class="opt-text">MARKELINEが受け取った<div class="opt-sub">外注・協業先から来た</div></div>
           </button>
         </div>
-      <div id="internal-warn" style="display:none;margin-top:12px;padding:10px 14px;background:#fff8e6;border:1px solid #e6a800;border-radius:6px;font-size:13px;color:#856000">
-        ⚠️ <strong>スタッフからの請求書・稼働報告書はメールで提出ルールです。</strong>このアプリからはアップロードしないでください。
-      </div>
+        <div id="internal-warn" style="display:none;margin-top:12px;padding:10px 14px;background:#fff8e6;border:1px solid #e6a800;border-radius:6px;font-size:13px;color:#856000">
+          ⚠️ <strong>スタッフからの請求書・稼働報告書はメールで提出ルールです。</strong>このアプリからはアップロードしないでください。
+        </div>
       </div>
 
-      <!-- STEP 3: 書類の日付 -->
       <div class="card" id="step3-card" style="display:none">
         <div class="step-label"><div class="step-num" id="sn3">3</div>書類の日付を選んでください</div>
         <div style="font-size:12px;color:var(--text2);margin-bottom:12px">📌 前月以前の書類はすべて「13.過去分追加」フォルダに自動格納されます</div>
@@ -194,30 +182,30 @@ textarea:focus{border-color:var(--accent);background:white}
         </div>
       </div>
 
-      <!-- STEP 3.5: サブフォルダ選択（動的表示） -->
       <div class="card" id="sub-select-card" style="display:none">
         <div class="step-label"><div class="step-num">▸</div><span id="sub-select-title">詳細を選んでください</span></div>
         <div class="opt-grid col3" id="sub-select-grid"></div>
       </div>
 
-      <!-- STEP 4: 相手 -->
+      <div class="card" id="extra-select-card" style="display:none">
+        <div class="step-label"><div class="step-num">▸</div><span id="extra-select-title">追加フォルダを選んでください</span></div>
+        <div class="opt-grid col3" id="extra-select-grid"></div>
+      </div>
+
       <div class="card" id="step4-card" style="display:none">
         <div class="step-label"><div class="step-num" id="sn4">4</div>相手の名前を入力してください（任意）</div>
         <input type="text" id="partner" placeholder="例：なかの歯科クリニック、田中太郎、株式会社〇〇" oninput="updateDestPreview()">
       </div>
 
-      <!-- 格納先プレビュー -->
       <div id="dest-preview-wrap" style="display:none">
         <div class="dest-preview" id="dest-preview">📁 格納先が決まると表示されます</div>
       </div>
 
-      <!-- STEP 5: メモ -->
       <div class="card" id="step5-card" style="display:none">
         <div class="step-label"><div class="step-num" id="sn5">5</div>補足メモ（任意）</div>
         <textarea id="memo" placeholder="補足説明など（任意）"></textarea>
       </div>
 
-      <!-- STEP 6: ファイル -->
       <div class="card" id="step6-card" style="display:none">
         <div class="step-label"><div class="step-num" id="sn6">6</div>ファイルをアップロード</div>
         <div class="dz" id="dz" ondragover="doDrag(event)" ondragleave="doLeave(event)" ondrop="doDrop(event)">
@@ -234,7 +222,6 @@ textarea:focus{border-color:var(--accent);background:white}
       </div>
     </div>
 
-    <!-- 履歴パネル -->
     <div id="pane-hi" style="display:none">
       <div class="sg" id="stats"></div>
       <div class="card"><div id="hlist"></div></div>
@@ -247,94 +234,55 @@ textarea:focus{border-color:var(--accent);background:white}
 const CLIENT_ID='517894712902-snug0s0mnhrjli3t0k1730p4cdgt6ttc.apps.googleusercontent.com';
 const REDIRECT_URI=location.origin+location.pathname;
 const SCOPES='https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email';
-const SKEY='keiri-hist-v14';
+const SKEY='keiri-hist-v15';
 const TOKEN_KEY='keiri-token-v2';
 const GAS_URL='https://script.google.com/macros/s/AKfycbxpKBYlSP2MzwwbrpOsdj756dgbpCaAAVHzq3WE8e2fBGI_2OubT3RYt4JFD_WIhN9C0g/exec';
 
-// ============================================================
-// フォルダID定義
-// ============================================================
 const FOLDERS = {
-  // 13. 過去分追加（前月以前はすべてここ）
   PAST: '158aXOVROQFiDlWuNEhVx-FAe2edIM4gK',
-
-  // 1. 請求書
   invoice: {
-    // 株式会社MARKELINE（受け取り請求書）→ 月別 → サブフォルダ
     markeline: '1JZZAm0Q5GGrv8jOg4mRHOeeQpQ4QNflo',
-    // 月別フォルダID（動的取得のため親IDのみ定義）
-    // サブフォルダ名定義
-    markeline_subs: ['ママさん請求書', '外部委託', '動画制作', 'Lステップ'],
-    // クライアントへ発行 → リスキリング（当月・先月・年フォルダあり）
+    markeline_subs: ['Lステップ', 'ママさん請求書', '外部', '動画制作'],
+    markeline_extra: {'外部':['通常の月別フォルダへ入れる','支払い済み']},
     reskilling: '1Ga6JoBq8N0NrymITLja9eTbE6K9-i8XE',
     reskilling_mirror: '1nxWo4jZpUBWwgFxFCH7AtsJ7Qc2AjP29',
-    // クライアントへ発行 → 一般（年→月別）
     general_client: '1RoEM0IZakGSdVH3CWjII7U4ygWH-LXIt',
-    // クライアントへ発行 → 毎月発行（表示のみ）
     monthly: '1VwXxKc8P5QYKWWukTL8lYzfYWW7Mz2de',
   },
-
-  // 2. 契約書
   contract: {
-    // 社内スタッフ → 当月・先月
     staff: '1ujNBwXiutx613ToACABs3z8fLNDGpzAU',
-    // 社内スタッフ → プロフェッショナル基準ガイド（直下）
     staff_prof: '1R3YfQlIr12FOAChkbvzesGTNARs8-NrK',
-    // クライアントへ発行 → 2026年 → 契約書（当月・先月）
     client: '1t0wjm9gmyCH2NiVkYM_QUvJJkr1jDFvg',
-    // クライアントへ発行 → 2026年 → お客様ファイル（直下）
     client_file: '1ZKFe_V2IvD9qeJm14man3ePmfnPQzLqs',
-    // 弊社が対応分 → 当月・先月
     received: '10z64Etlln2uDWgKbI_yR6JaxMfZunuHh',
-    // 弊社が対応分 → ママワークス（直下）
     mama_works: '1kOkebaPvkYRdey0066ErBYIh3pQpG9CP',
   },
-
-  // 3. 領収書
   receipt: {
-    // MARKELINE支払い分 → 2026年 → 当月・先月
     paid: '1N1VdjiosLfIPGsPTuIxWpx-JgdT2iwWs',
-    // 代表出張費（直下）
     travel: '1jPdUmC5G4nOJBTeJpLrkijukz4LyOUdT',
-    // MARKELINE発行分 → 2026年 → 当月・先月
     issued: '1GGddQ11kYkxo2jyaxVUcOdQ_ZodyavmU',
   },
-
-  // 4. 見積書
   estimate: {
-    issued: '1J5FiODzdMqay5cy92HnDby7qSOFJNlzS',   // MARKELINE発行分
-    received: '1-ObLL_OvuqEImxD3Wa6thdnJtmEkWB7T', // MARKELINE受取分
+    issued: '1J5FiODzdMqay5cy92HnDby7qSOFJNlzS',
+    received: '1-ObLL_OvuqEImxD3Wa6thdnJtmEkWB7T',
   },
-  // 5. 発注書
   order: {
-    issued: '1lPtTF9oXf_3i6i7SHmNjUwse6ZXuw6-a',   // MARKELINE発行分
-    received: '1nPTlcln3uYZoo8ax7_bqO9CgeZwW76wx',  // MARKELINE受取分
+    issued: '1lPtTF9oXf_3i6i7SHmNjUwse6ZXuw6-a',
+    received: '1nPTlcln3uYZoo8ax7_bqO9CgeZwW76wx',
   },
-  // 6. 納品書
   delivery: {
-    issued: '1V3sk3gET7Cd6vWoA7g2Nt4vkgcdEp_oL',    // MARKELINE発行分
-    received: '10XSX_Ix6KoaU-OPs2kHSaEbJodKsbkoj',  // MARKELINE受取分
+    issued: '1V3sk3gET7Cd6vWoA7g2Nt4vkgcdEp_oL',
+    received: '10XSX_Ix6KoaU-OPs2kHSaEbJodKsbkoj',
   },
-  timesheet: '1pa1PBD6jQDsRxR1zToxp0Ye6bcraDFME',   // 7. 稼働報告書（表示のみ）
-  // 8. 申込書
+  timesheet: '1pa1PBD6jQDsRxR1zToxp0Ye6bcraDFME',
   application: {
-    issued: '1tPHZNjf0Wg680vqASvQxI9LTMEvThGYQ',    // MARKELINE発行分
-    received: '1faDusYFtY7b7zZK52ptISh_dxW4caimO',  // MARKELINE受取分
+    issued: '1tPHZNjf0Wg680vqASvQxI9LTMEvThGYQ',
+    received: '1faDusYFtY7b7zZK52ptISh_dxW4caimO',
   },
-
-  // 9. 公開確認書（直下）
   disclosure: '1MZNV2P1ZFGZhhIgOoP-0sp_jL5A5hNgc',
-
-  // 10. その他 → 年→月別
   other: '1v-Gmox8BZgHb4LtP0qBqTzq44_U2bQSz',
-
-  // 11. 通帳
   bankbook: '1ypvg6NqXObHTfJuttmtPAwkXzQB_iQJT',
-
-  // 12. 追加資料 → 年→月別
   additional: '17w-w0gJYcoCgx_V_TvVkuLep2QAUdhHi',
-
-  // 14. IT導入補助金
   it_subsidy: {
     root: '14mKMDmInUNma7TOhOWm4qDbV9IGlY2bA',
     simulation: '1V2ywnv1LBc-4UJOTlLyCyfu-Fj8ZzTj8',
@@ -343,11 +291,10 @@ const FOLDERS = {
     delivery: '1zeukbLAmS56EuESElNu9m6bhU0vzR7v8',
     estimate: '1A5Mp0JsRFKdBM-famCGGLNlP04UMB6Qo',
     invoice: '1ihVykA6m9z3z6ip4gssupoq_SaNnZ3Xm',
-    application: '1hZiXFuxeKVfM22LdDCK-i7UrnvpVYy3h', // 申込書（年→月別）
+    application: '1hZiXFuxeKVfM22LdDCK-i7UrnvpVYy3h',
   },
 };
 
-// 書類種別定義
 const DOC_TYPES = [
   {id:'invoice',    icon:'🧾', label:'1. 請求書'},
   {id:'contract',   icon:'📝', label:'2. 契約書'},
@@ -375,47 +322,68 @@ const IT_SUB_TYPES = [
   {id:'application',label:'申込書'},
 ];
 
-// 方向性が不要（自動判定）な書類種別
 const AUTO_DIRECTION = {
   timesheet:   'internal',
   bankbook:    'internal',
-  additional:  null,  // 方向性不要
+  additional:  null,
   past:        null,
   it_subsidy:  null,
-  disclosure:  null,  // 発行 or 受取（聞く）
-  other:       null,  // 方向性不要
+  disclosure:  null,
+  other:       null,
 };
 
-// 相手入力が不要な書類種別
-const NO_PARTNER = ['bankbook','additional','past','other','timesheet'];
-
-// ============================================================
-// 状態
-// ============================================================
 let accessToken=null,tokenExpiry=0,currentUser=null;
 let files=[],hist=[];
 let sel = {
-  docType: null,      // 書類種別ID
-  itSub: null,        // IT補助金サブ種別
-  direction: null,    // issued / internal / received / null
-  dateMode: null,     // current / previous / older
-  invoiceType: null,  // reskilling / general（請求書発行時）
-  subFolder: null,    // サブフォルダ選択（請求書/契約書など）
-  subFolderId: null,  // 選択されたサブフォルダID
+  docType: null,
+  itSub: null,
+  direction: null,
+  dateMode: null,
+  invoiceType: null,
+  subFolder: null,
+  subFolderId: null,
+  extraSubFolder: null,
 };
 
-// ============================================================
-// OAuth
-// ============================================================
-function getAuthUrl(){const state=Math.random().toString(36).slice(2);sessionStorage.setItem('oauth_state',state);return 'https://accounts.google.com/o/oauth2/v2/auth?'+new URLSearchParams({client_id:CLIENT_ID,redirect_uri:REDIRECT_URI,response_type:'token',scope:SCOPES,state,include_granted_scopes:'true'});}
+function getAuthUrl(){
+  const state=Math.random().toString(36).slice(2);
+  sessionStorage.setItem('oauth_state',state);
+  return 'https://accounts.google.com/o/oauth2/v2/auth?'+new URLSearchParams({
+    client_id:CLIENT_ID,
+    redirect_uri:REDIRECT_URI,
+    response_type:'token',
+    scope:SCOPES,
+    state,
+    include_granted_scopes:'true'
+  });
+}
 function redirectToGoogle(){setMsg('Googleログインページへ移動します...');setTimeout(()=>{location.href=getAuthUrl();},500);}
 function signOut(){accessToken=null;tokenExpiry=0;currentUser=null;localStorage.removeItem(TOKEN_KEY);redirectToGoogle();}
 function setMsg(m){document.getElementById('loading-msg').textContent=m;}
-function saveToken(token,expiresIn){const expiry=Date.now()+(parseInt(expiresIn||3600)-120)*1000;localStorage.setItem(TOKEN_KEY,JSON.stringify({token,expiry}));accessToken=token;tokenExpiry=expiry;}
-function loadToken(){try{const d=JSON.parse(localStorage.getItem(TOKEN_KEY)||'null');if(d&&d.token&&d.expiry>Date.now()+60000){accessToken=d.token;tokenExpiry=d.expiry;return true;}}catch(e){}return false;}
+function saveToken(token,expiresIn){
+  const expiry=Date.now()+(parseInt(expiresIn||3600)-120)*1000;
+  localStorage.setItem(TOKEN_KEY,JSON.stringify({token,expiry}));
+  accessToken=token;tokenExpiry=expiry;
+}
+function loadToken(){
+  try{
+    const d=JSON.parse(localStorage.getItem(TOKEN_KEY)||'null');
+    if(d&&d.token&&d.expiry>Date.now()+60000){
+      accessToken=d.token;tokenExpiry=d.expiry;return true;
+    }
+  }catch(e){}
+  return false;
+}
 async function init(){
   const hash=location.hash.slice(1);
-  if(hash){const p=new URLSearchParams(hash);const token=p.get('access_token'),expiresIn=p.get('expires_in'),state=p.get('state');history.replaceState(null,'',location.pathname);if(token&&state&&state===sessionStorage.getItem('oauth_state')){saveToken(token,expiresIn);await startApp();return;}}
+  if(hash){
+    const p=new URLSearchParams(hash);
+    const token=p.get('access_token'),expiresIn=p.get('expires_in'),state=p.get('state');
+    history.replaceState(null,'',location.pathname);
+    if(token&&state&&state===sessionStorage.getItem('oauth_state')){
+      saveToken(token,expiresIn);await startApp();return;
+    }
+  }
   if(loadToken()){await startApp();return;}
   redirectToGoogle();
 }
@@ -436,24 +404,28 @@ async function startApp(){
     loadH();
     const remaining=tokenExpiry-Date.now();
     if(remaining>0)setTimeout(()=>{localStorage.removeItem(TOKEN_KEY);redirectToGoogle();},remaining);
-  }catch(e){localStorage.removeItem(TOKEN_KEY);redirectToGoogle();}
+  }catch(e){
+    localStorage.removeItem(TOKEN_KEY);
+    redirectToGoogle();
+  }
 }
 
-// ============================================================
-// 当月・先月ラベル
-// ============================================================
+function selectedDateObj(){
+  const n=new Date();
+  if(sel.dateMode==='previous') return new Date(n.getFullYear(), n.getMonth()-1, 1);
+  return n;
+}
+function selectedYearStr(){return `${selectedDateObj().getFullYear()}年`;}
+function curMonthStr(){const n=new Date();return `${n.getFullYear()}.${String(n.getMonth()+1).padStart(2,'0')}月分`;}
+function prevMonthStr(){const n=new Date();const p=new Date(n.getFullYear(),n.getMonth()-1,1);return `${p.getFullYear()}.${String(p.getMonth()+1).padStart(2,'0')}月分`;}
+function selectedMonthStr(){return sel.dateMode==='previous'?prevMonthStr():curMonthStr();}
 function initMonthLabels(){
   const now=new Date();
   const prev=new Date(now.getFullYear(),now.getMonth()-1,1);
   document.getElementById('cur-month-label').textContent=`今月（${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}月分）`;
   document.getElementById('prev-month-label').textContent=`先月（${prev.getFullYear()}.${String(prev.getMonth()+1).padStart(2,'0')}月分）`;
 }
-function curMonthStr(){const n=new Date();return `${n.getFullYear()}.${String(n.getMonth()+1).padStart(2,'0')}月分`;}
-function prevMonthStr(){const n=new Date();const p=new Date(n.getFullYear(),n.getMonth()-1,1);return `${p.getFullYear()}.${String(p.getMonth()+1).padStart(2,'0')}月分`;}
 
-// ============================================================
-// STEP 1: 書類種別
-// ============================================================
 function renderDocTypes(){
   const grid=document.getElementById('doc-type-grid');
   grid.innerHTML=DOC_TYPES.map(d=>`
@@ -461,103 +433,107 @@ function renderDocTypes(){
       <span class="opt-icon">${d.icon}</span>
       <div class="opt-text">${esc(d.label)}${d.displayOnly?'<div class="opt-sub">表示のみ</div>':''}</div>
     </button>`).join('');
-  // IT補助金サブ
   document.getElementById('it-sub-grid').innerHTML=IT_SUB_TYPES.map(t=>`
-    <button class="opt-btn" onclick="setItSub('${t.id}')" id="it-${t.id}">
+    <button class="opt-btn" onclick="setItSub('${t.id}', event)" id="it-${t.id}">
       <span class="opt-icon">📄</span>
       <div class="opt-text">${esc(t.label)}</div>
     </button>`).join('');
 }
 
+function resetAfterDocType(){
+  sel.itSub=null;sel.direction=null;sel.dateMode=null;sel.invoiceType=null;sel.subFolder=null;sel.subFolderId=null;sel.extraSubFolder=null;
+  hide('step2-card');hide('step3-card');hide('sub-select-card');hide('extra-select-card');hide('step4-card');hide('step5-card');hide('step6-card');
+  document.getElementById('dest-preview-wrap').style.display='none';
+  document.querySelectorAll('#direction-grid .opt-btn').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.dopt').forEach(b=>b.classList.remove('on'));
+}
+
 function setDocType(id){
-  sel.docType=id; sel.direction=null; sel.dateMode=null; sel.itSub=null;
+  sel.docType=id;
+  resetAfterDocType();
   document.querySelectorAll('#doc-type-grid .opt-btn').forEach(b=>b.classList.remove('on'));
   const btn=document.getElementById('dt-'+id);
   if(btn)btn.classList.add('on');
   document.getElementById('it-sub').style.display=id==='it_subsidy'?'':'none';
-  // 方向性が自動判定できるか
+
   if(id in AUTO_DIRECTION){
     sel.direction=AUTO_DIRECTION[id];
     hide('step2-card');
     showDateStep();
-  } else {
+  }else{
     show('step2-card');
-    hide('step3-card');hide('step4-card');hide('step5-card');hide('step6-card');
-    document.getElementById('dest-preview-wrap').style.display='none';
-    resetDirectionBtns();
   }
   updBtn();
 }
 
 function setDocTypeDirect(id){
-  // 13. 過去分追加 → 方向性・日付不要、直接格納
-  sel.docType=id; sel.direction=null; sel.dateMode='older'; sel.itSub=null;
+  sel.docType=id;
+  resetAfterDocType();
+  sel.dateMode='older';
   document.querySelectorAll('#doc-type-grid .opt-btn').forEach(b=>b.classList.remove('on'));
   const btn=document.getElementById('dt-'+id);
   if(btn)btn.classList.add('on');
-  hide('step2-card');hide('step3-card');
   show('step4-card');show('step5-card');show('step6-card');
   document.getElementById('dest-preview-wrap').style.display='';
   updateDestPreview();
   updBtn();
 }
 
-function setItSub(id){
+function setItSub(id, ev){
   sel.itSub=id;
   document.querySelectorAll('#it-sub-grid .opt-btn').forEach(b=>b.classList.remove('on'));
-  const btn=document.getElementById('it-'+id);
-  if(btn)btn.classList.add('on');
-  // 申込書のみ日付必要
+  if(ev)ev.currentTarget.classList.add('on');
   if(id==='application'){
+    sel.dateMode=null;
     show('step3-card');
-  } else {
-    sel.dateMode='current'; // 直下格納なので日付不要
+  }else{
+    sel.dateMode='current';
     hide('step3-card');
   }
-  const noPartner=true; // IT補助金は相手不要
+  hide('sub-select-card');hide('extra-select-card');
   show('step4-card');show('step5-card');show('step6-card');
   document.getElementById('dest-preview-wrap').style.display='';
   updateDestPreview();
   updBtn();
 }
 
-// ============================================================
-// STEP 2: 方向性
-// ============================================================
-function resetDirectionBtns(){document.querySelectorAll('#direction-grid .opt-btn').forEach(b=>b.classList.remove('on'));}
-function setDirection(d){
+function setDirection(d, ev){
   sel.direction=d;
-  resetDirectionBtns();
-  event.currentTarget.classList.add('on');
-  // 社内書類で請求書の場合、注意事項を表示
+  sel.invoiceType=null;sel.subFolder=null;sel.subFolderId=null;sel.extraSubFolder=null;
+  document.querySelectorAll('#direction-grid .opt-btn').forEach(b=>b.classList.remove('on'));
+  if(ev)ev.currentTarget.classList.add('on');
   const warn=document.getElementById('internal-warn');
-  if(warn){
-    warn.style.display=(d==='internal'&&sel.docType==='invoice')?'':'none';
-  }
+  if(warn)warn.style.display=(d==='internal'&&sel.docType==='invoice')?'':'none';
+  hide('extra-select-card');
   showDateStep();
   updBtn();
 }
+
 function showDateStep(){
-  // 日付が必要ないケース
   if(sel.docType==='past'||sel.docType==='disclosure'||(sel.docType==='it_subsidy'&&sel.itSub&&sel.itSub!=='application')){
     sel.dateMode='current';
     hide('step3-card');
-  } else {
+  }else{
     show('step3-card');
   }
-  // 請求書発行→リスキリング/一般選択
+
   if(sel.docType==='invoice'&&sel.direction==='issued'){
     showInvoiceTypeSelect();
     return;
   }
-  // 契約書サブ選択
+
+  if(sel.docType==='invoice'&&sel.direction==='received'){
+    hide('sub-select-card');hide('extra-select-card');hide('step4-card');hide('step5-card');hide('step6-card');
+    document.getElementById('dest-preview-wrap').style.display='none';
+    return;
+  }
+
   if(sel.docType==='contract'){
     showContractSubSelect();
     return;
   }
-  // 請求書受取・社内→サブフォルダ選択（日付選択後に表示）
-  hide('sub-select-card');
-  sel.subFolder=null;sel.subFolderId=null;
+
+  hide('sub-select-card');hide('extra-select-card');
   show('step4-card');show('step5-card');show('step6-card');
   document.getElementById('dest-preview-wrap').style.display='';
   updateDestPreview();
@@ -569,24 +545,72 @@ function showInvoiceTypeSelect(){
   document.getElementById('sub-select-title').textContent='どちらの請求書ですか？';
   const grid=document.getElementById('sub-select-grid');
   grid.innerHTML=`
-    <button class="opt-btn" onclick="setInvoiceType('reskilling')">
+    <button class="opt-btn" onclick="setInvoiceType('reskilling', event)">
       <span class="opt-icon">📋</span>
       <div class="opt-text">リスキリング助成金関連<div class="opt-sub">助成金申請用の請求書</div></div>
     </button>
-    <button class="opt-btn" onclick="setInvoiceType('general')">
+    <button class="opt-btn" onclick="setInvoiceType('general', event)">
       <span class="opt-icon">🧾</span>
       <div class="opt-text">一般の請求書<div class="opt-sub">通常のクライアント請求書</div></div>
     </button>`;
   show('sub-select-card');
-  hide('step4-card');hide('step5-card');hide('step6-card');
+  hide('extra-select-card');hide('step4-card');hide('step5-card');hide('step6-card');
   document.getElementById('dest-preview-wrap').style.display='none';
 }
 
-function setInvoiceType(type){
+function setInvoiceType(type, ev){
   sel.invoiceType=type;
   document.querySelectorAll('#sub-select-grid .opt-btn').forEach(b=>b.classList.remove('on'));
-  event.currentTarget.classList.add('on');
+  if(ev)ev.currentTarget.classList.add('on');
   show('step3-card');
+  show('step4-card');show('step5-card');show('step6-card');
+  document.getElementById('dest-preview-wrap').style.display='';
+  updateDestPreview();
+  updBtn();
+}
+
+function showReceivedInvoiceSubSelect(){
+  document.getElementById('sub-select-title').textContent='株式会社MARKELINEのどの請求書ですか？';
+  const grid=document.getElementById('sub-select-grid');
+  grid.innerHTML=FOLDERS.invoice.markeline_subs.map(name=>`
+    <button class="opt-btn" onclick="setReceivedInvoiceSub('${escAttr(name)}', event)">
+      <span class="opt-icon">📁</span>
+      <div class="opt-text">${esc(name)}<div class="opt-sub">年フォルダの中に格納</div></div>
+    </button>`).join('');
+  show('sub-select-card');
+  hide('extra-select-card');
+}
+
+function setReceivedInvoiceSub(name, ev){
+  sel.subFolder=name;
+  sel.extraSubFolder=null;
+  document.querySelectorAll('#sub-select-grid .opt-btn').forEach(b=>b.classList.remove('on'));
+  if(ev)ev.currentTarget.classList.add('on');
+
+  const extras=FOLDERS.invoice.markeline_extra[name];
+  if(extras&&extras.length){
+    document.getElementById('extra-select-title').textContent=`「${name}」の格納先を選んでください`;
+    document.getElementById('extra-select-grid').innerHTML=extras.map(x=>`
+      <button class="opt-btn" onclick="setReceivedInvoiceExtra('${escAttr(x)}', event)">
+        <span class="opt-icon">${x==='支払い済み'?'✅':'📅'}</span>
+        <div class="opt-text">${esc(x)}<div class="opt-sub">${x==='支払い済み'?'支払い済みフォルダの月別へ':'通常の月別フォルダへ'}</div></div>
+      </button>`).join('');
+    show('extra-select-card');
+    hide('step4-card');hide('step5-card');hide('step6-card');
+    document.getElementById('dest-preview-wrap').style.display='none';
+  }else{
+    hide('extra-select-card');
+    show('step4-card');show('step5-card');show('step6-card');
+    document.getElementById('dest-preview-wrap').style.display='';
+    updateDestPreview();
+  }
+  updBtn();
+}
+
+function setReceivedInvoiceExtra(name, ev){
+  sel.extraSubFolder=name==='通常の月別フォルダへ入れる'?null:name;
+  document.querySelectorAll('#extra-select-grid .opt-btn').forEach(b=>b.classList.remove('on'));
+  if(ev)ev.currentTarget.classList.add('on');
   show('step4-card');show('step5-card');show('step6-card');
   document.getElementById('dest-preview-wrap').style.display='';
   updateDestPreview();
@@ -599,39 +623,39 @@ function showContractSubSelect(){
   let options='';
   if(sel.direction==='internal'){
     options=`
-      <button class="opt-btn" onclick="setContractSub('staff_month','月別フォルダ（稼働開始月）','${FOLDERS.contract.staff}')">
+      <button class="opt-btn" onclick="setContractSub('staff_month','${FOLDERS.contract.staff}', event)">
         <span class="opt-icon">📅</span><div class="opt-text">月別フォルダ<div class="opt-sub">稼働開始月を選ぶ</div></div>
       </button>
-      <button class="opt-btn" onclick="setContractSubDirect('staff_prof','プロフェッショナル基準ガイド契約書','${FOLDERS.contract.staff_prof}')">
+      <button class="opt-btn" onclick="setContractSubDirect('staff_prof','${FOLDERS.contract.staff_prof}', event)">
         <span class="opt-icon">📘</span><div class="opt-text">プロフェッショナル基準ガイド契約書<div class="opt-sub">直下に格納</div></div>
       </button>`;
-  } else if(sel.direction==='issued'){
+  }else if(sel.direction==='issued'){
     options=`
-      <button class="opt-btn" onclick="setContractSub('client_month','契約書（月別）','${FOLDERS.contract.client}')">
+      <button class="opt-btn" onclick="setContractSub('client_month','${FOLDERS.contract.client}', event)">
         <span class="opt-icon">📅</span><div class="opt-text">契約書（月別）<div class="opt-sub">当月・先月を選ぶ</div></div>
       </button>
-      <button class="opt-btn" onclick="setContractSubDirect('client_file','お客様ファイル','${FOLDERS.contract.client_file}')">
+      <button class="opt-btn" onclick="setContractSubDirect('client_file','${FOLDERS.contract.client_file}', event)">
         <span class="opt-icon">👤</span><div class="opt-text">お客様ファイル<div class="opt-sub">直下に格納</div></div>
       </button>`;
-  } else if(sel.direction==='received'){
+  }else if(sel.direction==='received'){
     options=`
-      <button class="opt-btn" onclick="setContractSub('received_month','月別フォルダ','${FOLDERS.contract.received}')">
+      <button class="opt-btn" onclick="setContractSub('received_month','${FOLDERS.contract.received}', event)">
         <span class="opt-icon">📅</span><div class="opt-text">月別フォルダ<div class="opt-sub">当月・先月を選ぶ</div></div>
       </button>
-      <button class="opt-btn" onclick="setContractSubDirect('mama_works','ママワークス','${FOLDERS.contract.mama_works}')">
+      <button class="opt-btn" onclick="setContractSubDirect('mama_works','${FOLDERS.contract.mama_works}', event)">
         <span class="opt-icon">👶</span><div class="opt-text">ママワークス<div class="opt-sub">直下に格納</div></div>
       </button>`;
   }
   grid.innerHTML=options;
   show('sub-select-card');
-  hide('step3-card');hide('step4-card');hide('step5-card');hide('step6-card');
+  hide('extra-select-card');hide('step3-card');hide('step4-card');hide('step5-card');hide('step6-card');
   document.getElementById('dest-preview-wrap').style.display='none';
 }
 
-function setContractSub(type, label, parentId){
+function setContractSub(type, parentId, ev){
   sel.subFolder=type;sel.subFolderId=null;
   document.querySelectorAll('#sub-select-grid .opt-btn').forEach(b=>b.classList.remove('on'));
-  event.currentTarget.classList.add('on');
+  if(ev)ev.currentTarget.classList.add('on');
   show('step3-card');
   show('step4-card');show('step5-card');show('step6-card');
   document.getElementById('dest-preview-wrap').style.display='';
@@ -639,10 +663,10 @@ function setContractSub(type, label, parentId){
   updBtn();
 }
 
-function setContractSubDirect(type, label, folderId){
+function setContractSubDirect(type, folderId, ev){
   sel.subFolder=type;sel.subFolderId=folderId;sel.dateMode='current';
   document.querySelectorAll('#sub-select-grid .opt-btn').forEach(b=>b.classList.remove('on'));
-  event.currentTarget.classList.add('on');
+  if(ev)ev.currentTarget.classList.add('on');
   hide('step3-card');
   show('step4-card');show('step5-card');show('step6-card');
   document.getElementById('dest-preview-wrap').style.display='';
@@ -650,69 +674,72 @@ function setContractSubDirect(type, label, folderId){
   updBtn();
 }
 
-// ============================================================
-// STEP 3: 日付
-// ============================================================
 function setDateMode(m){
   sel.dateMode=m;
+  sel.subFolder = (sel.docType==='invoice'&&sel.direction==='received') ? null : sel.subFolder;
+  sel.extraSubFolder = null;
   ['current','previous','older'].forEach(x=>{
     const el=document.getElementById('dopt-'+x.replace('current','cur').replace('previous','prev').replace('older','old'));
     if(el)el.classList.toggle('on',x===m);
   });
+
+  if(sel.docType==='invoice'&&sel.direction==='received'&&m!=='older'){
+    showReceivedInvoiceSubSelect();
+    hide('step4-card');hide('step5-card');hide('step6-card');
+    document.getElementById('dest-preview-wrap').style.display='none';
+  }else{
+    hide('extra-select-card');
+    if(sel.docType==='invoice'&&sel.direction==='received'&&m==='older'){
+      hide('sub-select-card');
+      show('step4-card');show('step5-card');show('step6-card');
+      document.getElementById('dest-preview-wrap').style.display='';
+    }
+  }
+
   updateDestPreview();
   updBtn();
 }
 
-// ============================================================
-// 格納先の決定ロジック
-// ============================================================
 async function resolveTargetFolderId(){
   const {docType,direction,dateMode,itSub}=sel;
   const isOlder=dateMode==='older';
-  const monthStr=dateMode==='current'?curMonthStr():prevMonthStr();
+  const monthStr=selectedMonthStr();
 
-  // 前月以前 → 13.過去分追加
   if(isOlder) return {id:FOLDERS.PAST, path:'13. 過去分追加', mirror:null};
-
-  // 13.過去分追加 直接
   if(docType==='past') return {id:FOLDERS.PAST, path:'13. 過去分追加', mirror:null};
 
-  // 14. IT導入補助金
   if(docType==='it_subsidy'){
     if(!itSub) return null;
     if(itSub==='application'){
-      // 申込書 → 年→月別（子フォルダを動的取得）
       const monthFolderId=await findOrNoteMonthFolder(FOLDERS.it_subsidy.application, monthStr);
       return {id:monthFolderId||FOLDERS.it_subsidy.application, path:`14. IT導入補助金 / 申込書 / ${monthStr}`, mirror:null};
     }
     return {id:FOLDERS.it_subsidy[itSub], path:`14. IT導入補助金 / ${IT_SUB_TYPES.find(t=>t.id===itSub)?.label}`, mirror:null};
   }
 
-  // 9. 公開確認書（直下）
   if(docType==='disclosure') return {id:FOLDERS.disclosure, path:'9. 公開確認書', mirror:null};
 
-  // 4. 見積書（発行・受取で月別フォルダ）
   if(docType==='estimate'){
     const folder=direction==='received'?FOLDERS.estimate.received:FOLDERS.estimate.issued;
     const label=direction==='received'?'MARKELINE受取分':'MARKELINE発行分';
     const fid=await findOrNoteMonthFolder(folder, monthStr);
     return {id:fid||folder, path:`4. 見積書 / ${label} / ${monthStr}`, mirror:null};
   }
-  // 5. 発注書（発行・受取で月別フォルダ）
+
   if(docType==='order'){
     const folder=direction==='received'?FOLDERS.order.received:FOLDERS.order.issued;
     const label=direction==='received'?'MARKELINE受取分':'MARKELINE発行分';
     const fid=await findOrNoteMonthFolder(folder, monthStr);
     return {id:fid||folder, path:`5. 発注書 / ${label} / ${monthStr}`, mirror:null};
   }
-  // 6. 納品書（発行・受取で月別フォルダ）
+
   if(docType==='delivery'){
     const folder=direction==='received'?FOLDERS.delivery.received:FOLDERS.delivery.issued;
     const label=direction==='received'?'MARKELINE受取分':'MARKELINE発行分';
     const fid=await findOrNoteMonthFolder(folder, monthStr);
     return {id:fid||folder, path:`6. 納品書 / ${label} / ${monthStr}`, mirror:null};
   }
-  // 8. 申込書（発行・受取で月別フォルダ）
+
   if(docType==='application'){
     const folder=direction==='received'?FOLDERS.application.received:FOLDERS.application.issued;
     const label=direction==='received'?'MARKELINE受取分':'MARKELINE発行分';
@@ -720,101 +747,61 @@ async function resolveTargetFolderId(){
     return {id:fid||folder, path:`8. 申込書 / ${label} / ${monthStr}`, mirror:null};
   }
 
-  // 10. その他 → 年→月別
   if(docType==='other'){
     const fid=await findOrNoteMonthFolder(FOLDERS.other, monthStr);
     return {id:fid||FOLDERS.other, path:`10. その他 / ${monthStr}`, mirror:null};
   }
 
-  // 11. 通帳
   if(docType==='bankbook') return {id:FOLDERS.bankbook, path:'11. 通帳', mirror:null};
 
-  // 12. 追加資料
   if(docType==='additional'){
     const fid=await findOrNoteMonthFolder(FOLDERS.additional, monthStr);
     return {id:fid||FOLDERS.additional, path:`12. 追加資料 / ${monthStr}`, mirror:null};
   }
 
-  // 7. 稼働報告書（表示のみ・ここには来ない）
   if(docType==='timesheet') return null;
 
-  // 1. 請求書
   if(docType==='invoice'){
     if(direction==='internal'){
-      // 社内 → 月フォルダ → サブフォルダ（動的取得済みの場合）
       const monthFid=await findOrNoteMonthFolder(FOLDERS.invoice.markeline, monthStr);
       const mfid=monthFid||FOLDERS.invoice.markeline;
-      // サブフォルダ選択はSTEP追加で対応（現状は月フォルダまで）
-      return {id:mfid, path:`1. 請求書 / 株式会社MARKELINE / ${monthStr}`, mirror:null, needsSub:true, subParentId:mfid, subNames:FOLDERS.invoice.markeline_subs};
+      return {id:mfid, path:`1. 請求書 / 株式会社MARKELINE / ${monthStr}`, mirror:null};
     }
+
     if(direction==='issued'){
       if(sel.invoiceType==='reskilling'){
-        // リスキリング → 年フォルダ → 月フォルダ（動的取得）
         const fid=await findOrNoteMonthFolder(FOLDERS.invoice.reskilling, monthStr);
         const mid=await findOrNoteMonthFolder(FOLDERS.invoice.reskilling_mirror, monthStr);
         return {id:fid||FOLDERS.invoice.reskilling, path:`1. 請求書 / クライアントへ発行分 / リスキリング助成金関連 / ${monthStr}`, mirror:mid||FOLDERS.invoice.reskilling_mirror};
       }
       if(sel.invoiceType==='general'){
-        // 一般 → 年→月別（動的取得）
         const fid=await findOrNoteMonthFolder(FOLDERS.invoice.general_client, monthStr);
         return {id:fid||FOLDERS.invoice.general_client, path:`1. 請求書 / クライアントへ発行分 / 一般の請求書 / ${monthStr}`, mirror:null};
       }
       return null;
     }
-   if (direction === 'received') {
 
-  // 受け取った → 株式会社MARKELINE → 年 → 種別 → 月別
+    if(direction==='received'){
+      if(!sel.subFolder) return null;
+      const yearStr=selectedYearStr();
+      const yearFid=await findOrCreateFolder(FOLDERS.invoice.markeline, yearStr);
+      const categoryFid=await findOrCreateFolder(yearFid||FOLDERS.invoice.markeline, sel.subFolder);
 
-  const yearFid = await findOrNoteYearFolder(FOLDERS.invoice.markeline, yearStr);
+      let parentId=categoryFid;
+      let path=`1. 請求書 / 株式会社MARKELINE / ${yearStr} / ${sel.subFolder}`;
 
-  const yfid = yearFid || FOLDERS.invoice.markeline;
+      if(sel.extraSubFolder){
+        parentId=await findOrCreateFolder(categoryFid, sel.extraSubFolder);
+        path += ` / ${sel.extraSubFolder}`;
+      }
 
-  return {
-
-    id: yfid,
-
-    path: `1. 請求書 / 株式会社MARKELINE / ${yearStr}`,
-
-    mirror: null,
-
-    needsSub: true,
-
-    subParentId: yfid,
-
-    // 年フォルダ直下で選ばせるフォルダ
-
-    subNames: [
-
-      'Lステップ',
-
-      'ママさん請求書',
-
-      '外部',
-
-      '動画制作'
-
-    ],
-
-    // 種別フォルダの下に月別フォルダを作る
-
-    needsMonthAfterSub: true,
-
-    // 外部だけ「支払い済み」フォルダも選べるようにする
-
-    extraSubFolders: {
-
-      '外部': ['支払い済み']
-
+      const monthFid=await findOrCreateFolder(parentId, monthStr);
+      return {id:monthFid||parentId, path:`${path} / ${monthStr}`, mirror:null};
     }
+  }
 
-  };
-
-}
-
-  // 2. 契約書
   if(docType==='contract'){
     if(sel.subFolderId){
-      // 直接指定（お客様ファイル・プロフェッショナル・ママワークス）
       const labels={'staff_prof':'プロフェッショナル基準ガイド契約書','client_file':'お客様ファイル','mama_works':'ママワークス'};
       return {id:sel.subFolderId, path:`2. 契約書 / ${labels[sel.subFolder]||sel.subFolder}`, mirror:null};
     }
@@ -832,7 +819,6 @@ async function resolveTargetFolderId(){
     }
   }
 
-  // 3. 領収書
   if(docType==='receipt'){
     if(direction==='issued'){
       const fid=await findOrNoteMonthFolder(FOLDERS.receipt.issued, monthStr);
@@ -850,11 +836,10 @@ async function resolveTargetFolderId(){
   return null;
 }
 
-// Drive APIで子フォルダから月フォルダIDを取得
 async function findOrNoteMonthFolder(parentId, monthStr){
   try{
-    const q=encodeURIComponent(`parentId='${parentId}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
-    const r=await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)&pageSize=50`,{headers:{Authorization:`Bearer ${accessToken}`}});
+    const q=encodeURIComponent(`'${parentId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`);
+    const r=await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)&pageSize=100`,{headers:{Authorization:`Bearer ${accessToken}`}});
     if(!r.ok)return null;
     const d=await r.json();
     const found=(d.files||[]).find(f=>f.name===monthStr);
@@ -862,17 +847,45 @@ async function findOrNoteMonthFolder(parentId, monthStr){
   }catch(e){return null;}
 }
 
-// ============================================================
-// 格納先プレビュー表示
-// ============================================================
+async function findChildFolder(parentId, folderName){
+  try{
+    const safeName=String(folderName).replace(/'/g, "\\'");
+    const q=encodeURIComponent(`'${parentId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false and name='${safeName}'`);
+    const r=await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)&pageSize=10`,{headers:{Authorization:`Bearer ${accessToken}`}});
+    if(!r.ok)return null;
+    const d=await r.json();
+    return d.files?.[0]?.id || null;
+  }catch(e){return null;}
+}
+
+async function findOrCreateFolder(parentId, folderName){
+  const existing=await findChildFolder(parentId, folderName);
+  if(existing)return existing;
+
+  const r=await fetch('https://www.googleapis.com/drive/v3/files?fields=id,name',{
+    method:'POST',
+    headers:{
+      Authorization:`Bearer ${accessToken}`,
+      'Content-Type':'application/json'
+    },
+    body:JSON.stringify({
+      name:folderName,
+      mimeType:'application/vnd.google-apps.folder',
+      parents:[parentId]
+    })
+  });
+  if(!r.ok)return null;
+  const d=await r.json();
+  return d.id;
+}
+
 let previewTimer=null;
 function updateDestPreview(){
   clearTimeout(previewTimer);
   previewTimer=setTimeout(async()=>{
     const el=document.getElementById('dest-preview');
     const wrap=document.getElementById('dest-preview-wrap');
-    const {docType,direction,dateMode}=sel;
-    if(!docType){wrap.style.display='none';return;}
+    if(!sel.docType){wrap.style.display='none';return;}
     wrap.style.display='';
     el.className='dest-preview';
     el.innerHTML='⏳ 格納先を確認中...';
@@ -884,22 +897,16 @@ function updateDestPreview(){
     if(sel.dateMode==='older'||sel.docType==='past'){
       el.className='dest-preview warn';
       el.innerHTML=`⚠️ 前月以前のため → <strong>13. 過去分追加</strong> に格納されます`;
-    } else {
+    }else{
       el.className='dest-preview set';
       el.innerHTML=`✅ 格納先：<strong>${esc(info.path)}</strong>${info.mirror?'<br>📎 同時保存：リスキリング関連フォルダにも格納':''}`;
     }
   },300);
 }
 
-// ============================================================
-// STEP 5〜6 表示制御
-// ============================================================
 function show(id){const el=document.getElementById(id);if(el)el.style.display='';}
 function hide(id){const el=document.getElementById(id);if(el)el.style.display='none';}
 
-// ============================================================
-// ファイル操作
-// ============================================================
 function doDrag(e){e.preventDefault();document.getElementById('dz').classList.add('over');}
 function doLeave(e){document.getElementById('dz').classList.remove('over');}
 function doDrop(e){e.preventDefault();document.getElementById('dz').classList.remove('over');addFiles([...e.dataTransfer.files]);}
@@ -927,21 +934,24 @@ function updBtn(){
   if(!sel.docType||!files.length){document.getElementById('upbtn').disabled=true;return;}
   if(sel.docType==='past'){document.getElementById('upbtn').disabled=false;return;}
   if(sel.docType==='timesheet'){document.getElementById('upbtn').disabled=true;return;}
+
   const needsDir=!(sel.docType in AUTO_DIRECTION);
   if(needsDir&&!sel.direction){document.getElementById('upbtn').disabled=true;return;}
-  // 請求書発行はinvoiceType必要
   if(sel.docType==='invoice'&&sel.direction==='issued'&&!sel.invoiceType){document.getElementById('upbtn').disabled=true;return;}
+  if(sel.docType==='invoice'&&sel.direction==='received'&&sel.dateMode!=='older'&&!sel.subFolder){document.getElementById('upbtn').disabled=true;return;}
+  if(sel.docType==='invoice'&&sel.direction==='received'&&sel.subFolder==='外部'&&sel.dateMode!=='older'&&sel.extraSubFolder===null&&document.getElementById('extra-select-card').style.display!=='none'){
+    document.getElementById('upbtn').disabled=true;return;
+  }
   if(!sel.dateMode){document.getElementById('upbtn').disabled=true;return;}
+
   document.getElementById('upbtn').disabled=false;
 }
 
-// ============================================================
-// アップロード
-// ============================================================
 async function doUp(){
   const info=await resolveTargetFolderId();
   if(!info){toast('err','格納先が決定できません。選択を確認してください');return;}
   if(!files.length){toast('err','ファイルを選択してください');return;}
+
   const btn=document.getElementById('upbtn');
   btn.disabled=true;btn.innerHTML='<div class="sp"></div> アップロード中...';
   const results=[];
@@ -958,9 +968,14 @@ async function doUp(){
       form.append('metadata',new Blob([JSON.stringify(metadata)],{type:'application/json'}));
       form.append('file',f);
       const r=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name',{
-        method:'POST',headers:{Authorization:`Bearer ${accessToken}`},body:form
+        method:'POST',
+        headers:{Authorization:`Bearer ${accessToken}`},
+        body:form
       });
-      if(!r.ok){const err=await r.json().catch(()=>({}));throw new Error(err.error?.message||`HTTP ${r.status}`);}
+      if(!r.ok){
+        const err=await r.json().catch(()=>({}));
+        throw new Error(err.error?.message||`HTTP ${r.status}`);
+      }
       const df=await r.json();
       if(metaEl)metaEl.innerHTML='<span style="color:var(--success);font-weight:500">✅ 完了</span>';
       results.push({name:f.name,size:f.size,status:'success',driveId:df.id});
@@ -977,10 +992,10 @@ async function doUp(){
   hist.unshift(entry);
   try{localStorage.setItem(SKEY,JSON.stringify(hist.slice(0,200)));}catch(e){}
 
-  // GAS通知
   try{
     const payload=JSON.stringify({userName:currentUser?.name||'不明',userEmail:currentUser?.email||'—',timestamp:new Date().toISOString(),path,memo:memo||'—',files:results});
-    const img=new Image();img.src=GAS_URL+'?contents='+encodeURIComponent(payload);
+    const img=new Image();
+    img.src=GAS_URL+'?contents='+encodeURIComponent(payload);
   }catch(e){}
 
   btn.disabled=false;btn.innerHTML='📤 アップロード';
@@ -990,7 +1005,7 @@ async function doUp(){
 }
 
 function clearAll(){
-  sel={docType:null,itSub:null,direction:null,dateMode:null,invoiceType:null,subFolder:null,subFolderId:null};
+  sel={docType:null,itSub:null,direction:null,dateMode:null,invoiceType:null,subFolder:null,subFolderId:null,extraSubFolder:null};
   files=[];
   document.getElementById('fi').value='';
   document.getElementById('memo').value='';
@@ -998,14 +1013,11 @@ function clearAll(){
   document.querySelectorAll('.opt-btn').forEach(b=>b.classList.remove('on'));
   document.querySelectorAll('.dopt').forEach(b=>b.classList.remove('on'));
   document.getElementById('it-sub').style.display='none';
-  hide('step2-card');hide('step3-card');hide('sub-select-card');hide('step4-card');hide('step5-card');hide('step6-card');
+  hide('step2-card');hide('step3-card');hide('sub-select-card');hide('extra-select-card');hide('step4-card');hide('step5-card');hide('step6-card');
   document.getElementById('dest-preview-wrap').style.display='none';
   renderFiles();updBtn();
 }
 
-// ============================================================
-// タブ切替
-// ============================================================
 function sw(t){
   document.getElementById('pane-up').style.display=t==='up'?'':'none';
   document.getElementById('pane-hi').style.display=t==='hi'?'':'none';
@@ -1014,11 +1026,11 @@ function sw(t){
   if(t==='hi')loadH();
 }
 
-// ============================================================
-// 履歴（自分のみ）
-// ============================================================
 function loadH(){
-  try{const all=JSON.parse(localStorage.getItem(SKEY)||'[]');hist=all.filter(h=>h.user===(currentUser?.name||''));}catch(e){hist=[];}
+  try{
+    const all=JSON.parse(localStorage.getItem(SKEY)||'[]');
+    hist=all.filter(h=>h.user===(currentUser?.name||''));
+  }catch(e){hist=[];}
   renderStats();renderH();
 }
 function renderStats(){
@@ -1045,9 +1057,16 @@ function renderH(){
   }).join('');
 }
 
-function toast(type,msg){const w=document.getElementById('tw'),d=document.createElement('div');d.className=`toast ${type}`;d.textContent=msg;w.appendChild(d);setTimeout(()=>d.remove(),4500);}
+function toast(type,msg){
+  const w=document.getElementById('tw'),d=document.createElement('div');
+  d.className=`toast ${type}`;
+  d.textContent=msg;
+  w.appendChild(d);
+  setTimeout(()=>d.remove(),4500);
+}
 function fmtB(b){if(b<1024)return b+'B';if(b<1048576)return Math.round(b/1024)+'KB';return(b/1048576).toFixed(1)+'MB';}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function escAttr(s){return String(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 init();
 </script>
