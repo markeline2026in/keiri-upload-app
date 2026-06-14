@@ -529,10 +529,10 @@ function setDirection(d){
   sel.direction=d;
   resetDirectionBtns();
   event.currentTarget.classList.add('on');
-  // 社内書類で請求書の場合、注意事項を表示
+  // 請求書で社内を選んだ場合、稼働報告書・スタッフ請求書はメール提出の注意事項を表示
   const warn=document.getElementById('internal-warn');
   if(warn){
-    warn.style.display=(d==='internal'&&sel.docType==='invoice')?'':'none';
+    warn.style.display=(d==='internal'&&(sel.docType==='invoice'||sel.docType==='timesheet'))?'':'none';
   }
   showDateStep();
   updBtn();
@@ -555,12 +555,52 @@ function showDateStep(){
     showContractSubSelect();
     return;
   }
-  // 請求書受取・社内→サブフォルダ選択（日付選択後に表示）
+  // 請求書（受取）→MARKELINEサブフォルダ選択
+  if(sel.docType==='invoice'&&sel.direction==='received'){
+    showInvoiceSubSelect();
+    return;
+  }
   hide('sub-select-card');
   sel.subFolder=null;sel.subFolderId=null;
   show('step4-card');show('step5-card');show('step6-card');
   document.getElementById('dest-preview-wrap').style.display='';
   updateDestPreview();
+}
+
+function showInvoiceSubSelect(){
+  document.getElementById('sub-select-title').textContent='どのフォルダに入れますか？';
+  const grid=document.getElementById('sub-select-grid');
+  grid.innerHTML=`
+    <button class="opt-btn" onclick="setInvoiceSub('mama','ママさん請求書')">
+      <span class="opt-icon">👩</span><div class="opt-text">ママさん請求書</div>
+    </button>
+    <button class="opt-btn" onclick="setInvoiceSub('gaibunin','外部委託（未払い）')">
+      <span class="opt-icon">🤝</span><div class="opt-text">外部委託<div class="opt-sub">未払い分</div></div>
+    </button>
+    <button class="opt-btn" onclick="setInvoiceSub('gaibunin_paid','外部委託（支払い済み）')">
+      <span class="opt-icon">✅</span><div class="opt-text">外部委託<div class="opt-sub">支払い済み</div></div>
+    </button>
+    <button class="opt-btn" onclick="setInvoiceSub('video','動画制作')">
+      <span class="opt-icon">🎬</span><div class="opt-text">動画制作</div>
+    </button>
+    <button class="opt-btn" onclick="setInvoiceSub('lstep','Lステップ')">
+      <span class="opt-icon">📱</span><div class="opt-text">Lステップ</div>
+    </button>`;
+  show('sub-select-card');
+  show('step3-card');
+  hide('step4-card');hide('step5-card');hide('step6-card');
+  document.getElementById('dest-preview-wrap').style.display='none';
+}
+
+function setInvoiceSub(type, label){
+  sel.subFolder=type;
+  document.querySelectorAll('#sub-select-grid .opt-btn').forEach(b=>b.classList.remove('on'));
+  event.currentTarget.classList.add('on');
+  show('step3-card');
+  show('step4-card');show('step5-card');show('step6-card');
+  document.getElementById('dest-preview-wrap').style.display='';
+  updateDestPreview();
+  updBtn();
 }
 
 function showInvoiceTypeSelect(){
@@ -598,27 +638,30 @@ function showContractSubSelect(){
   const grid=document.getElementById('sub-select-grid');
   let options='';
   if(sel.direction==='internal'){
+    const sf=FOLDERS.contract.staff, pf=FOLDERS.contract.staff_prof;
     options=`
-      <button class="opt-btn" onclick="setContractSub('staff_month','月別フォルダ（稼働開始月）','${FOLDERS.contract.staff}')">
+      <button class="opt-btn" onclick="setContractSub('staff_month','月別フォルダ（稼働開始月）','${sf}')">
         <span class="opt-icon">📅</span><div class="opt-text">月別フォルダ<div class="opt-sub">稼働開始月を選ぶ</div></div>
       </button>
-      <button class="opt-btn" onclick="setContractSubDirect('staff_prof','プロフェッショナル基準ガイド契約書','${FOLDERS.contract.staff_prof}')">
+      <button class="opt-btn" onclick="setContractSubDirect('staff_prof','プロフェッショナル基準ガイド契約書','${pf}')">
         <span class="opt-icon">📘</span><div class="opt-text">プロフェッショナル基準ガイド契約書<div class="opt-sub">直下に格納</div></div>
       </button>`;
   } else if(sel.direction==='issued'){
+    const cf=FOLDERS.contract.client, cff=FOLDERS.contract.client_file;
     options=`
-      <button class="opt-btn" onclick="setContractSub('client_month','契約書（月別）','${FOLDERS.contract.client}')">
+      <button class="opt-btn" onclick="setContractSub('client_month','契約書（月別）','${cf}')">
         <span class="opt-icon">📅</span><div class="opt-text">契約書（月別）<div class="opt-sub">当月・先月を選ぶ</div></div>
       </button>
-      <button class="opt-btn" onclick="setContractSubDirect('client_file','お客様ファイル','${FOLDERS.contract.client_file}')">
+      <button class="opt-btn" onclick="setContractSubDirect('client_file','お客様ファイル','${cff}')">
         <span class="opt-icon">👤</span><div class="opt-text">お客様ファイル<div class="opt-sub">直下に格納</div></div>
       </button>`;
   } else if(sel.direction==='received'){
+    const rf=FOLDERS.contract.received, mf=FOLDERS.contract.mama_works;
     options=`
-      <button class="opt-btn" onclick="setContractSub('received_month','月別フォルダ','${FOLDERS.contract.received}')">
+      <button class="opt-btn" onclick="setContractSub('received_month','月別フォルダ','${rf}')">
         <span class="opt-icon">📅</span><div class="opt-text">月別フォルダ<div class="opt-sub">当月・先月を選ぶ</div></div>
       </button>
-      <button class="opt-btn" onclick="setContractSubDirect('mama_works','ママワークス','${FOLDERS.contract.mama_works}')">
+      <button class="opt-btn" onclick="setContractSubDirect('mama_works','ママワークス','${mf}')">
         <span class="opt-icon">👶</span><div class="opt-text">ママワークス<div class="opt-sub">直下に格納</div></div>
       </button>`;
   }
@@ -740,12 +783,34 @@ async function resolveTargetFolderId(){
 
   // 1. 請求書
   if(docType==='invoice'){
-    if(direction==='internal'){
-      // 社内 → 月フォルダ → サブフォルダ（動的取得済みの場合）
+    if(direction==='received'){
+      // 株式会社MARKELINE / 月別 / サブフォルダ
       const monthFid=await findOrNoteMonthFolder(FOLDERS.invoice.markeline, monthStr);
       const mfid=monthFid||FOLDERS.invoice.markeline;
-      // サブフォルダ選択はSTEP追加で対応（現状は月フォルダまで）
-      return {id:mfid, path:`1. 請求書 / 株式会社MARKELINE / ${monthStr}`, mirror:null, needsSub:true, subParentId:mfid, subNames:FOLDERS.invoice.markeline_subs};
+      // サブフォルダID取得
+      const subMap={
+        'mama': 'ママさん請求書',
+        'gaibunin': '外部委託',
+        'gaibunin_paid': '外部委託',
+        'video': '動画制作',
+        'lstep': 'Lステップ',
+      };
+      const subName=subMap[sel.subFolder];
+      if(subName){
+        // 月フォルダ内のサブフォルダを検索
+        const subFid=await findOrNoteSubFolder(mfid, subName);
+        if(sel.subFolder==='gaibunin_paid'&&subFid){
+          // 支払い済みはさらに「支払い済み請求書」フォルダ
+          const paidFid=await findOrNoteSubFolder(subFid,'支払い済み請求書');
+          return {id:paidFid||subFid, path:`1. 請求書 / 株式会社MARKELINE / ${monthStr} / ${subName} / 支払い済み請求書`, mirror:null};
+        }
+        return {id:subFid||mfid, path:`1. 請求書 / 株式会社MARKELINE / ${monthStr} / ${subName}`, mirror:null};
+      }
+      return {id:mfid, path:`1. 請求書 / 株式会社MARKELINE / ${monthStr}`, mirror:null};
+    }
+    if(direction==='internal'){
+      // 社内 → 注意表示のみ・通常は格納不可
+      return null;
     }
     if(direction==='issued'){
       if(sel.invoiceType==='reskilling'){
@@ -761,12 +826,7 @@ async function resolveTargetFolderId(){
       }
       return null;
     }
-    if(direction==='received'){
-      // 受け取った → 株式会社MARKELINE / 月別 → サブフォルダ
-      const monthFid=await findOrNoteMonthFolder(FOLDERS.invoice.markeline, monthStr);
-      const mfid=monthFid||FOLDERS.invoice.markeline;
-      return {id:mfid, path:`1. 請求書 / 株式会社MARKELINE / ${monthStr}`, mirror:null, needsSub:true, subParentId:mfid, subNames:FOLDERS.invoice.markeline_subs};
-    }
+
   }
 
   // 2. 契約書
@@ -806,6 +866,18 @@ async function resolveTargetFolderId(){
   }
 
   return null;
+}
+
+// Drive APIでサブフォルダIDを取得
+async function findOrNoteSubFolder(parentId, folderName){
+  try{
+    const q=encodeURIComponent(`parentId='${parentId}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
+    const r=await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)&pageSize=50`,{headers:{Authorization:`Bearer ${accessToken}`}});
+    if(!r.ok)return null;
+    const d=await r.json();
+    const found=(d.files||[]).find(f=>f.name===folderName);
+    return found?found.id:null;
+  }catch(e){return null;}
 }
 
 // Drive APIで子フォルダから月フォルダIDを取得
