@@ -570,28 +570,21 @@ function showDateStep(){
 function showInvoiceSubSelect(){
   document.getElementById('sub-select-title').textContent='どのフォルダに入れますか？';
   const grid=document.getElementById('sub-select-grid');
-  grid.innerHTML=`
-    <button class="opt-btn" onclick="setInvoiceSub('mama','ママさん請求書')">
-      <span class="opt-icon">👩</span><div class="opt-text">ママさん請求書</div>
+ grid.innerHTML=`
+    <button class="opt-btn" onclick="setInvoiceSub('direct','月フォルダ直下')">
+      <span class="opt-icon">📅</span><div class="opt-text">月フォルダ直下<div class="opt-sub">サブフォルダなし</div></div>
     </button>
     <button class="opt-btn" onclick="setInvoiceSub('gaibunin','外部委託（未払い）')">
       <span class="opt-icon">🤝</span><div class="opt-text">外部委託<div class="opt-sub">未払い分</div></div>
     </button>
     <button class="opt-btn" onclick="setInvoiceSub('gaibunin_paid','外部委託（支払い済み）')">
       <span class="opt-icon">✅</span><div class="opt-text">外部委託<div class="opt-sub">支払い済み</div></div>
-    </button>
-    <button class="opt-btn" onclick="setInvoiceSub('video','動画制作')">
-      <span class="opt-icon">🎬</span><div class="opt-text">動画制作</div>
-    </button>
-    <button class="opt-btn" onclick="setInvoiceSub('lstep','Lステップ')">
-      <span class="opt-icon">📱</span><div class="opt-text">Lステップ</div>
     </button>`;
   show('sub-select-card');
   show('step3-card');
   hide('step4-card');hide('step5-card');hide('step6-card');
   document.getElementById('dest-preview-wrap').style.display='none';
 }
-
 function setInvoiceSub(type, label){
   sel.subFolder=type;
   document.querySelectorAll('#sub-select-grid .opt-btn').forEach(b=>b.classList.remove('on'));
