@@ -782,16 +782,15 @@ async function resolveTargetFolderId(){
       const monthFid=await findOrNoteYearThenMonth(FOLDERS.invoice.markeline, monthStr);
       const mfid=monthFid||FOLDERS.invoice.markeline;
       // サブフォルダID取得
+      if(!sel.subFolder||sel.subFolder==='direct'){
+        // 月フォルダ直下
+        return {id:mfid, path:`1. 請求書 / 株式会社MARKELINE / ${monthStr}`, mirror:null};
+      }
       const subMap={
-        'direct': null,
         'gaibunin': '外部委託',
         'gaibunin_paid': '外部委託',
       };
       const subName=subMap[sel.subFolder];
-      if(sel.subFolder==='direct'||subName===null){
-        // 月フォルダ直下
-        return {id:mfid, path:`1. 請求書 / 株式会社MARKELINE / ${monthStr}`, mirror:null};
-      }
       if(subName){
         // 月フォルダ内のサブフォルダを検索
         const subFid=await findOrNoteSubFolder(mfid, subName);
@@ -864,8 +863,12 @@ async function resolveTargetFolderId(){
   return null;
 }
 
-// 年フォルダ→月フォルダの順で取得
+// 年フォルダの有無を動的に判断して月フォルダIDを取得
 async function findOrNoteYearThenMonth(parentId, monthStr){
+  // まず直下に月フォルダがあるか確認
+  const directMonth=await findOrNoteMonthFolder(parentId, monthStr);
+  if(directMonth) return directMonth;
+  // なければ年フォルダを経由
   const year=monthStr.substring(0,4)+'年';
   const yearFid=await findOrNoteSubFolder(parentId, year);
   if(!yearFid) return null;
