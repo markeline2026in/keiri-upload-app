@@ -445,11 +445,11 @@ async function startApp(){
 function initMonthLabels(){
   const now=new Date();
   const prev=new Date(now.getFullYear(),now.getMonth()-1,1);
-  document.getElementById('cur-month-label').textContent=`今月（${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}月分）`;
-  document.getElementById('prev-month-label').textContent=`先月（${prev.getFullYear()}.${String(prev.getMonth()+1).padStart(2,'0')}月分）`;
+  document.getElementById('cur-month-label').textContent=`今月（${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}月）`;
+  document.getElementById('prev-month-label').textContent=`先月（${prev.getFullYear()}.${String(prev.getMonth()+1).padStart(2,'0')}月）`;
 }
-function curMonthStr(){const n=new Date();return `${n.getFullYear()}.${String(n.getMonth()+1).padStart(2,'0')}月分`;}
-function prevMonthStr(){const n=new Date();const p=new Date(n.getFullYear(),n.getMonth()-1,1);return `${p.getFullYear()}.${String(p.getMonth()+1).padStart(2,'0')}月分`;}
+function curMonthStr(){const n=new Date();return `${n.getFullYear()}.${String(n.getMonth()+1).padStart(2,'0')}月`;}
+function prevMonthStr(){const n=new Date();const p=new Date(n.getFullYear(),n.getMonth()-1,1);return `${p.getFullYear()}.${String(p.getMonth()+1).padStart(2,'0')}月`;}
 
 // ============================================================
 // STEP 1: 書類種別
@@ -887,14 +887,34 @@ async function findOrNoteSubFolder(parentId, folderName){
   }catch(e){return null;}
 }
 
-// Drive APIで子フォルダから月フォルダIDを取得
+// 月文字列から年・月の数字を抽出
+function parseMonthStr(monthStr){
+  // 例: "2026.06月", "2026.6月", "2026.06月分", "R8.6", "R8.06月分"
+  // 西暦の場合
+  let m = monthStr.match(/(\d{4})[.\-\/]0*(\d{1,2})/);
+  if(m) return {year:parseInt(m[1]), month:parseInt(m[2])};
+  // 令和の場合（R8 = 2026年）
+  m = monthStr.match(/[Rr](\d+)[.\-\/]?0*(\d{1,2})/);
+  if(m) return {year:2018+parseInt(m[1]), month:parseInt(m[2])};
+  return null;
+}
+
+// フォルダ名が同じ年月を指しているか確認
+function isSameMonth(folderName, monthStr){
+  const a=parseMonthStr(folderName);
+  const b=parseMonthStr(monthStr);
+  if(!a||!b) return folderName===monthStr;
+  return a.year===b.year && a.month===b.month;
+}
+
+// Drive APIで子フォルダから月フォルダIDを取得（表記揺れ対応）
 async function findOrNoteMonthFolder(parentId, monthStr){
   try{
     const q=encodeURIComponent(`parentId='${parentId}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
-    const r=await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)&pageSize=50`,{headers:{Authorization:`Bearer ${accessToken}`}});
+    const r=await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)&pageSize=100`,{headers:{Authorization:`Bearer ${accessToken}`}});
     if(!r.ok)return null;
     const d=await r.json();
-    const found=(d.files||[]).find(f=>f.name===monthStr);
+    const found=(d.files||[]).find(f=>isSameMonth(f.name, monthStr));
     return found?found.id:null;
   }catch(e){return null;}
 }
