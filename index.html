@@ -863,16 +863,16 @@ async function resolveTargetFolderId(){
   return null;
 }
 
-// 年フォルダの有無を動的に判断して月フォルダIDを取得
+// 年フォルダを作成/取得して、その中の月フォルダに格納する
 async function findOrNoteYearThenMonth(parentId, monthStr){
-  // まず直下に月フォルダがあるか確認
-  const directMonth=await findOrNoteMonthFolder(parentId, monthStr);
-  if(directMonth) return directMonth;
-  // なければ年フォルダを経由
   const year=monthStr.substring(0,4)+'年';
-  const yearFid=await findOrNoteSubFolder(parentId, year);
+  const yearFid=await findOrCreateSubFolder(parentId, year);
   if(!yearFid) return null;
-  return await findOrNoteMonthFolder(yearFid, monthStr);
+
+  const monthFid=await findOrNoteMonthFolder(yearFid, monthStr);
+  if(monthFid) return monthFid;
+
+  return await createFolder(yearFid, monthStr);
 }
 
 // Drive APIでサブフォルダIDを取得
@@ -885,6 +885,32 @@ async function findOrNoteSubFolder(parentId, folderName){
     const found=(d.files||[]).find(f=>f.name===folderName);
     return found?found.id:null;
   }catch(e){return null;}
+
+  async function findOrCreateSubFolder(parentId, folderName){
+  const found=await findOrNoteSubFolder(parentId, folderName);
+  if(found) return found;
+  return await createFolder(parentId, folderName);
+}
+
+async function createFolder(parentId, folderName){
+  try{
+    const r=await fetch('https://www.googleapis.com/drive/v3/files?fields=id,name',{
+      method:'POST',
+      headers:{
+        Authorization:`Bearer ${accessToken}`,
+        'Content-Type':'application/json'
+      },
+      body:JSON.stringify({
+        name:folderName,
+        mimeType:'application/vnd.google-apps.folder',
+        parents:[parentId]
+      })
+    });
+    if(!r.ok)return null;
+    const d=await r.json();
+    return d.id||null;
+  }catch(e){return null;}
+}
 }
 
 // 月文字列から年・月の数字を抽出
