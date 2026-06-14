@@ -761,13 +761,55 @@ async function resolveTargetFolderId(){
       }
       return null;
     }
-    if(direction==='received'){
-      // 受け取った → 株式会社MARKELINE / 月別 → サブフォルダ
-      const monthFid=await findOrNoteMonthFolder(FOLDERS.invoice.markeline, monthStr);
-      const mfid=monthFid||FOLDERS.invoice.markeline;
-      return {id:mfid, path:`1. 請求書 / 株式会社MARKELINE / ${monthStr}`, mirror:null, needsSub:true, subParentId:mfid, subNames:FOLDERS.invoice.markeline_subs};
+   if (direction === 'received') {
+
+  // 受け取った → 株式会社MARKELINE → 年 → 種別 → 月別
+
+  const yearFid = await findOrNoteYearFolder(FOLDERS.invoice.markeline, yearStr);
+
+  const yfid = yearFid || FOLDERS.invoice.markeline;
+
+  return {
+
+    id: yfid,
+
+    path: `1. 請求書 / 株式会社MARKELINE / ${yearStr}`,
+
+    mirror: null,
+
+    needsSub: true,
+
+    subParentId: yfid,
+
+    // 年フォルダ直下で選ばせるフォルダ
+
+    subNames: [
+
+      'Lステップ',
+
+      'ママさん請求書',
+
+      '外部',
+
+      '動画制作'
+
+    ],
+
+    // 種別フォルダの下に月別フォルダを作る
+
+    needsMonthAfterSub: true,
+
+    // 外部だけ「支払い済み」フォルダも選べるようにする
+
+    extraSubFolders: {
+
+      '外部': ['支払い済み']
+
     }
-  }
+
+  };
+
+}
 
   // 2. 契約書
   if(docType==='contract'){
