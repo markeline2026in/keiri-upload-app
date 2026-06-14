@@ -833,4 +833,181 @@ function updateDestPreview(){
     if(!docType){wrap.style.display='none';return;}
     wrap.style.display='';
     el.className='dest-preview';
+    el.innerHTML='⏳ 格納先を確認中...';
+    const info=await resolveTargetFolderId();
+    if(!info){
+      el.innerHTML='📁 格納先を決定するために全ての選択を完了してください';
+      return;
+    }
+    if(sel.dateMode==='older'||sel.docType==='past'){
+      el.className='dest-preview warn';
+      el.innerHTML=`⚠️ 前月以前のため → <strong>13. 過去分追加</strong> に格納されます`;
+    } else {
+      el.className='dest-preview set';
+      el.innerHTML=`✅ 格納先：<strong>${esc(info.path)}</strong>${info.mirror?'<br>📎 同時保存：リスキリング関連フォルダにも格納':''}`;
+    }
+  },300);
+}
 
+// ============================================================
+// STEP 5〜6 表示制御
+// ============================================================
+function show(id){const el=document.getElementById(id);if(el)el.style.display='';}
+function hide(id){const el=document.getElementById(id);if(el)el.style.display='none';}
+
+// ============================================================
+// ファイル操作
+// ============================================================
+function doDrag(e){e.preventDefault();document.getElementById('dz').classList.add('over');}
+function doLeave(e){document.getElementById('dz').classList.remove('over');}
+function doDrop(e){e.preventDefault();document.getElementById('dz').classList.remove('over');addFiles([...e.dataTransfer.files]);}
+function onFiles(e){addFiles([...e.target.files]);}
+function addFiles(fs){
+  fs.forEach(f=>{
+    if(f.size>50*1024*1024){toast('err',f.name+' は50MBを超えています');return;}
+    if(!files.find(x=>x.name===f.name&&x.size===f.size))files.push(f);
+  });
+  renderFiles();updBtn();
+}
+function rmFile(i){files.splice(i,1);renderFiles();updBtn();}
+function renderFiles(){
+  document.getElementById('fl').innerHTML=files.map((f,i)=>`
+    <div class="fitem">
+      <span style="font-size:18px;color:var(--accent);flex-shrink:0">📄</span>
+      <div class="fitem-info">
+        <div class="fitem-name">${esc(f.name)}</div>
+        <div class="fitem-meta" id="fmeta${i}">${fmtB(f.size)}</div>
+      </div>
+      <button class="frm" onclick="rmFile(${i})">✕</button>
+    </div>`).join('');
+}
+function updBtn(){
+  if(!sel.docType||!files.length){document.getElementById('upbtn').disabled=true;return;}
+  if(sel.docType==='past'){document.getElementById('upbtn').disabled=false;return;}
+  if(sel.docType==='timesheet'){document.getElementById('upbtn').disabled=true;return;}
+  const needsDir=!(sel.docType in AUTO_DIRECTION);
+  if(needsDir&&!sel.direction){document.getElementById('upbtn').disabled=true;return;}
+  // 請求書発行はinvoiceType必要
+  if(sel.docType==='invoice'&&sel.direction==='issued'&&!sel.invoiceType){document.getElementById('upbtn').disabled=true;return;}
+  if(!sel.dateMode){document.getElementById('upbtn').disabled=true;return;}
+  document.getElementById('upbtn').disabled=false;
+}
+
+// ============================================================
+// アップロード
+// ============================================================
+async function doUp(){
+  const info=await resolveTargetFolderId();
+  if(!info){toast('err','格納先が決定できません。選択を確認してください');return;}
+  if(!files.length){toast('err','ファイルを選択してください');return;}
+  const btn=document.getElementById('upbtn');
+  btn.disabled=true;btn.innerHTML='<div class="sp"></div> アップロード中...';
+  const results=[];
+  const partner=document.getElementById('partner').value.trim();
+
+  for(let i=0;i<files.length;i++){
+    const f=files[i];
+    const metaEl=document.getElementById('fmeta'+i);
+    if(metaEl)metaEl.innerHTML='アップロード中...';
+    try{
+      const parents=info.mirror?[info.id,info.mirror]:[info.id];
+      const metadata={name:f.name,parents};
+      const form=new FormData();
+      form.append('metadata',new Blob([JSON.stringify(metadata)],{type:'application/json'}));
+      form.append('file',f);
+      const r=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name',{
+        method:'POST',headers:{Authorization:`Bearer ${accessToken}`},body:form
+      });
+      if(!r.ok){const err=await r.json().catch(()=>({}));throw new Error(err.error?.message||`HTTP ${r.status}`);}
+      const df=await r.json();
+      if(metaEl)metaEl.innerHTML='<span style="color:var(--success);font-weight:500">✅ 完了</span>';
+      results.push({name:f.name,size:f.size,status:'success',driveId:df.id});
+    }catch(e){
+      if(metaEl)metaEl.innerHTML=`<span style="color:var(--danger);font-weight:500">❌ ${esc(e.message)}</span>`;
+      results.push({name:f.name,size:f.size,status:'error',error:e.message});
+    }
+  }
+
+  const ok=results.filter(r=>r.status==='success').length;
+  const path=info.path+(partner?` / ${partner}`:'');
+  const memo=document.getElementById('memo').value;
+  const entry={id:Date.now(),ts:new Date().toISOString(),user:currentUser?.name||'不明',userPic:currentUser?.picture||'',path,memo,files:results};
+  hist.unshift(entry);
+  try{localStorage.setItem(SKEY,JSON.stringify(hist.slice(0,200)));}catch(e){}
+
+  // GAS通知
+  try{
+    const payload=JSON.stringify({userName:currentUser?.name||'不明',userEmail:currentUser?.email||'—',timestamp:new Date().toISOString(),path,memo:memo||'—',files:results});
+    const img=new Image();img.src=GAS_URL+'?contents='+encodeURIComponent(payload);
+  }catch(e){}
+
+  btn.disabled=false;btn.innerHTML='📤 アップロード';
+  if(ok===results.length){toast('ok',`✅ ${ok}件を「${path}」に保存しました`);setTimeout(()=>clearAll(),2500);}
+  else toast('err',`⚠️ ${ok}/${results.length}件成功`);
+  updBtn();
+}
+
+function clearAll(){
+  sel={docType:null,itSub:null,direction:null,dateMode:null,invoiceType:null,subFolder:null,subFolderId:null};
+  files=[];
+  document.getElementById('fi').value='';
+  document.getElementById('memo').value='';
+  document.getElementById('partner').value='';
+  document.querySelectorAll('.opt-btn').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.dopt').forEach(b=>b.classList.remove('on'));
+  document.getElementById('it-sub').style.display='none';
+  hide('step2-card');hide('step3-card');hide('sub-select-card');hide('step4-card');hide('step5-card');hide('step6-card');
+  document.getElementById('dest-preview-wrap').style.display='none';
+  renderFiles();updBtn();
+}
+
+// ============================================================
+// タブ切替
+// ============================================================
+function sw(t){
+  document.getElementById('pane-up').style.display=t==='up'?'':'none';
+  document.getElementById('pane-hi').style.display=t==='hi'?'':'none';
+  document.getElementById('tb-up').classList.toggle('on',t==='up');
+  document.getElementById('tb-hi').classList.toggle('on',t==='hi');
+  if(t==='hi')loadH();
+}
+
+// ============================================================
+// 履歴（自分のみ）
+// ============================================================
+function loadH(){
+  try{const all=JSON.parse(localStorage.getItem(SKEY)||'[]');hist=all.filter(h=>h.user===(currentUser?.name||''));}catch(e){hist=[];}
+  renderStats();renderH();
+}
+function renderStats(){
+  const t=hist.length,f=hist.reduce((s,h)=>s+(h.files?.length||0),0);
+  document.getElementById('stats').innerHTML=`
+    <div class="sc"><div class="sl">アップロード回数</div><div class="sv">${t}</div></div>
+    <div class="sc"><div class="sl">ファイル数</div><div class="sv">${f}</div></div>
+    <div class="sc"><div class="sl">担当者</div><div class="sv" style="font-size:14px">${esc(currentUser?.name||'')}</div></div>`;
+}
+function renderH(){
+  const el=document.getElementById('hlist');
+  if(!hist.length){el.innerHTML='<div class="empty">📭 履歴がありません</div>';return;}
+  el.innerHTML=hist.slice(0,50).map(h=>{
+    const dt=new Date(h.ts).toLocaleDateString('ja-JP',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    const ok=h.files?.filter(f=>f.status==='success').length||0,tot=h.files?.length||0;
+    const av=h.userPic?`<img src="${h.userPic}" alt="">`:esc((h.user||'?').slice(0,1));
+    return`<div class="hi"><div class="hav">${av}</div><div class="hb">
+      <div class="ht">${esc(h.path?.split(' / ').pop()||'')}</div>
+      <div class="hm"><span>${dt}</span><span class="badge ${ok===tot?'ok':'err'}">${ok}/${tot}件</span></div>
+      <div class="hp">📁 ${esc(h.path||'')}</div>
+      ${h.memo?`<div style="font-size:12px;color:var(--text2);margin-top:4px">💬 ${esc(h.memo)}</div>`:''}
+      <div class="hfs">${(h.files||[]).slice(0,5).map(f=>`<span class="chip">${esc(f.name)}</span>`).join('')}${(h.files?.length||0)>5?`<span class="chip">+${h.files.length-5}件</span>`:''}</div>
+    </div></div>`;
+  }).join('');
+}
+
+function toast(type,msg){const w=document.getElementById('tw'),d=document.createElement('div');d.className=`toast ${type}`;d.textContent=msg;w.appendChild(d);setTimeout(()=>d.remove(),4500);}
+function fmtB(b){if(b<1024)return b+'B';if(b<1048576)return Math.round(b/1024)+'KB';return(b/1048576).toFixed(1)+'MB';}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+init();
+</script>
+</body>
+</html>
