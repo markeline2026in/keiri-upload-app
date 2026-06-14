@@ -878,7 +878,7 @@ async function findOrNoteYearThenMonth(parentId, monthStr){
 // Drive APIでサブフォルダIDを取得
 async function findOrNoteSubFolder(parentId, folderName){
   try{
-    const q=encodeURIComponent(`parentId='${parentId}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
+   const q=encodeURIComponent(`'${parentId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`);
     const r=await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)&pageSize=50`,{headers:{Authorization:`Bearer ${accessToken}`}});
     if(!r.ok)return null;
     const d=await r.json();
@@ -910,7 +910,7 @@ function isSameMonth(folderName, monthStr){
 // Drive APIで子フォルダから月フォルダIDを取得（表記揺れ対応）
 async function findOrNoteMonthFolder(parentId, monthStr){
   try{
-    const q=encodeURIComponent(`parentId='${parentId}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
+    const q=encodeURIComponent(`'${parentId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`);
     const r=await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)&pageSize=100`,{headers:{Authorization:`Bearer ${accessToken}`}});
     if(!r.ok)return null;
     const d=await r.json();
