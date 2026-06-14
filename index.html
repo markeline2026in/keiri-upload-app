@@ -793,10 +793,10 @@ async function resolveTargetFolderId(){
       const subName=subMap[sel.subFolder];
       if(subName){
         // 月フォルダ内のサブフォルダを検索
-        const subFid=await findOrNoteSubFolder(mfid, subName);
+        const subFid=await findOrCreateSubFolder(mfid, subName);
         if(sel.subFolder==='gaibunin_paid'&&subFid){
           // 支払い済みはさらに「支払い済み請求書」フォルダ
-          const paidFid=await findOrNoteSubFolder(subFid,'支払い済み請求書');
+          const paidFid=await findOrCreateSubFolder(subFid,'支払い済み請求書');
           return {id:paidFid||subFid, path:`1. 請求書 / 株式会社MARKELINE / ${monthStr} / ${subName} / 支払い済み請求書`, mirror:null};
         }
         return {id:subFid||mfid, path:`1. 請求書 / 株式会社MARKELINE / ${monthStr} / ${subName}`, mirror:null};
@@ -863,30 +863,29 @@ async function resolveTargetFolderId(){
   return null;
 }
 
-// 年フォルダを作成/取得して、その中の月フォルダに格納する
+// 年フォルダの有無を動的に判断して月フォルダIDを取得
 async function findOrNoteYearThenMonth(parentId, monthStr){
   const year=monthStr.substring(0,4)+'年';
   const yearFid=await findOrCreateSubFolder(parentId, year);
   if(!yearFid) return null;
-
   const monthFid=await findOrNoteMonthFolder(yearFid, monthStr);
   if(monthFid) return monthFid;
-
   return await createFolder(yearFid, monthStr);
 }
 
 // Drive APIでサブフォルダIDを取得
 async function findOrNoteSubFolder(parentId, folderName){
   try{
-   const q=encodeURIComponent(`'${parentId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`);
+    const q=encodeURIComponent(`'${parentId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`);
     const r=await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)&pageSize=50`,{headers:{Authorization:`Bearer ${accessToken}`}});
     if(!r.ok)return null;
     const d=await r.json();
     const found=(d.files||[]).find(f=>f.name===folderName);
     return found?found.id:null;
   }catch(e){return null;}
+}
 
-  async function findOrCreateSubFolder(parentId, folderName){
+async function findOrCreateSubFolder(parentId, folderName){
   const found=await findOrNoteSubFolder(parentId, folderName);
   if(found) return found;
   return await createFolder(parentId, folderName);
@@ -896,28 +895,20 @@ async function createFolder(parentId, folderName){
   try{
     const r=await fetch('https://www.googleapis.com/drive/v3/files?fields=id,name',{
       method:'POST',
-      headers:{
-        Authorization:`Bearer ${accessToken}`,
-        'Content-Type':'application/json'
-      },
-      body:JSON.stringify({
-        name:folderName,
-        mimeType:'application/vnd.google-apps.folder',
-        parents:[parentId]
-      })
+      headers:{Authorization:`Bearer ${accessToken}`,'Content-Type':'application/json'},
+      body:JSON.stringify({name:folderName,mimeType:'application/vnd.google-apps.folder',parents:[parentId]})
     });
     if(!r.ok)return null;
     const d=await r.json();
     return d.id||null;
   }catch(e){return null;}
 }
-}
 
 // 月文字列から年・月の数字を抽出
 function parseMonthStr(monthStr){
-  // 例: "2026.06月", "2026.6月", "2026.06月分", "R8.6", "R8.06月分"
+  // 例: "2026.06月", "2026.6月", "2026.06月分", "2026年6月", "R8.6", "R8.06月分"
   // 西暦の場合
-  let m = monthStr.match(/(\d{4})[.\-\/]0*(\d{1,2})/);
+  let m = monthStr.match(/(\d{4})\s*(?:年|[.\-\/])\s*0*(\d{1,2})/);
   if(m) return {year:parseInt(m[1]), month:parseInt(m[2])};
   // 令和の場合（R8 = 2026年）
   m = monthStr.match(/[Rr](\d+)[.\-\/]?0*(\d{1,2})/);
