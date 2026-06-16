@@ -867,16 +867,20 @@ async function resolveTargetFolderId(){
   return null;
 }
 
-// 年フォルダの有無を動的に判断して月フォルダIDを取得
+// 年フォルダを経由して月フォルダIDを取得（年フォルダ優先）
 async function findOrNoteYearThenMonth(parentId, monthStr){
-  // まず直下に月フォルダがあるか確認
-  const directMonth=await findOrNoteMonthFolder(parentId, monthStr);
-  if(directMonth) return directMonth;
-  // なければ年フォルダを経由
   const year=monthStr.substring(0,4)+'年';
+  // まず年フォルダを探す
   const yearFid=await findOrNoteSubFolder(parentId, year);
-  if(!yearFid) return null;
-  return await findOrNoteMonthFolder(yearFid, monthStr);
+  if(yearFid){
+    // 年フォルダがあれば月フォルダを探す
+    const monthFid=await findOrNoteMonthFolder(yearFid, monthStr);
+    if(monthFid) return monthFid;
+    // 月フォルダが見つからなければ年フォルダを返す
+    return yearFid;
+  }
+  // 年フォルダがなければ直下に月フォルダを探す
+  return await findOrNoteMonthFolder(parentId, monthStr);
 }
 
 // Drive APIでサブフォルダIDを取得
