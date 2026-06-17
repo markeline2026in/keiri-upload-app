@@ -286,8 +286,10 @@ const FOLDERS = {
     client_file: '1HYSwVmV5hLSWbu_F7Djmgsy2Sx12M6F0',
     // 弊社が対応分 → 当月・先月
     received: '10z64Etlln2uDWgKbI_yR6JaxMfZunuHh',
-    // 弊社が対応分 → ママワークス（直下）
+    // 弊社が対応分 → ママワークス → 月別
     mama_works: '1kOkebaPvkYRdey0066ErBYIh3pQpG9CP',
+    // 社内 → 契約解除通知書（直下）
+    cancellation: '1saO-DuvPC3Bcd27cABfusnu7iMO-vUb0',
   },
 
   // 3. 領収書
@@ -632,13 +634,16 @@ function showContractSubSelect(){
   const grid=document.getElementById('sub-select-grid');
   let options='';
   if(sel.direction==='internal'){
-    const sf=FOLDERS.contract.staff, pf=FOLDERS.contract.staff_prof;
+    const sf=FOLDERS.contract.staff, pf=FOLDERS.contract.staff_prof, cf=FOLDERS.contract.cancellation;
     options=`
       <button class="opt-btn" onclick="setContractSub('staff_month','月別フォルダ（稼働開始月）','${sf}')">
         <span class="opt-icon">📅</span><div class="opt-text">月別フォルダ<div class="opt-sub">稼働開始月を選ぶ</div></div>
       </button>
       <button class="opt-btn" onclick="setContractSubDirect('staff_prof','プロフェッショナル基準ガイド契約書','${pf}')">
         <span class="opt-icon">📘</span><div class="opt-text">プロフェッショナル基準ガイド契約書<div class="opt-sub">直下に格納</div></div>
+      </button>
+      <button class="opt-btn" onclick="setContractSubDirect('cancellation','契約解除通知書','${cf}')">
+        <span class="opt-icon">📋</span><div class="opt-text">契約解除通知書<div class="opt-sub">直下に格納</div></div>
       </button>`;
   } else if(sel.direction==='issued'){
     const cf=FOLDERS.contract.client, cff=FOLDERS.contract.client_file;
@@ -655,8 +660,8 @@ function showContractSubSelect(){
       <button class="opt-btn" onclick="setContractSub('received_month','月別フォルダ','${rf}')">
         <span class="opt-icon">📅</span><div class="opt-text">月別フォルダ<div class="opt-sub">当月・先月を選ぶ</div></div>
       </button>
-      <button class="opt-btn" onclick="setContractSubDirect('mama_works','ママワークス','${mf}')">
-        <span class="opt-icon">👶</span><div class="opt-text">ママワークス<div class="opt-sub">直下に格納</div></div>
+      <button class="opt-btn" onclick="setContractSub('mama_works','ママワークス','${mf}')">
+        <span class="opt-icon">👶</span><div class="opt-text">ママワークス → 月別<div class="opt-sub">当月・先月を選ぶ</div></div>
       </button>`;
   }
   grid.innerHTML=options;
@@ -828,7 +833,7 @@ async function resolveTargetFolderId(){
   if(docType==='contract'){
     if(sel.subFolderId){
       // 直接指定（お客様ファイル・プロフェッショナル・ママワークス）
-      const labels={'staff_prof':'プロフェッショナル基準ガイド契約書','mama_works':'ママワークス'};
+      const labels={'staff_prof':'プロフェッショナル基準ガイド契約書','cancellation':'契約解除通知書','mama_works':'ママワークス'};
       return {id:sel.subFolderId, path:`2. 契約書 / ${labels[sel.subFolder]||sel.subFolder}`, mirror:null};
     }
     if(direction==='internal'){
@@ -837,13 +842,22 @@ async function resolveTargetFolderId(){
     }
     if(direction==='issued'){
       if(sel.subFolder==='client_file'){
-        const fid=await findOrNoteYearThenMonth(FOLDERS.contract.client_file, monthStr);
-        return {id:fid||FOLDERS.contract.client_file, path:`2. 契約書 / クライアントへの発行 / お客様ファイル / ${monthStr}`, mirror:null};
+        // お客様ファイル → 年フォルダ直下に格納（月フォルダなし）
+        const year=monthStr.substring(0,4)+'年';
+        const yearFid=await findOrNoteSubFolder(FOLDERS.contract.client_file, year);
+        return {id:yearFid||FOLDERS.contract.client_file, path:`2. 契約書 / クライアントへの発行 / お客様ファイル / ${year}`, mirror:null};
       }
+      // 契約書 → 年 → 月
       const fid=await findOrNoteYearThenMonth(FOLDERS.contract.client, monthStr);
       return {id:fid||FOLDERS.contract.client, path:`2. 契約書 / クライアントへの発行 / 契約書 / ${monthStr}`, mirror:null};
     }
     if(direction==='received'){
+      if(sel.subFolder==='mama_works'){
+        // ママワークス → 月別
+        const fid=await findOrNoteMonthFolder(FOLDERS.contract.mama_works, monthStr);
+        return {id:fid||FOLDERS.contract.mama_works, path:`2. 契約書 / 弊社が対応分 / ママワークス / ${monthStr}`, mirror:null};
+      }
+      // 年 → 月
       const fid=await findOrNoteYearThenMonth(FOLDERS.contract.received, monthStr);
       return {id:fid||FOLDERS.contract.received, path:`2. 契約書 / 弊社が対応分 / ${monthStr}`, mirror:null};
     }
