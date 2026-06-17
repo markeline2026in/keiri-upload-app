@@ -282,6 +282,10 @@ const FOLDERS = {
     staff_prof: '1R3YfQlIr12FOAChkbvzesGTNARs8-NrK',
     // クライアントへ発行（親フォルダ）→ 年 → 契約書/お客様ファイル
     client_parent: '1t0wjm9gmyCH2NiVkYM_QUvJJkr1jDFvg',
+    // クライアントへ発行 → 2026年 → 契約書（直接ID）
+    client_keiyaku: '17OJ3U5Jf0lc_1XvJHnn0GdEiBQSNSNcG',
+    // クライアントへ発行 → 2026年 → お客様ファイル（直接ID）
+    client_okyakusama: '1ioXHE8f94mJCmZ2z9UfdmV7MkIzOuB-r',
     // 弊社が対応分 → 当月・先月
     received: '10z64Etlln2uDWgKbI_yR6JaxMfZunuHh',
     // 弊社が対応分 → ママワークス → 月別
@@ -840,19 +844,18 @@ async function resolveTargetFolderId(){
     }
     if(direction==='issued'){
       const year=monthStr.substring(0,4)+'年';
-      // まず年フォルダを取得
+      // 年フォルダを動的に取得
       const yearFid=await findOrNoteSubFolder(FOLDERS.contract.client_parent, year);
-      if(!yearFid) return {id:FOLDERS.contract.client_parent, path:`2. 契約書 / クライアントへの発行`, mirror:null};
       if(sel.subFolder==='client_file'){
         // 年 → お客様ファイル → 直下に格納
-        const clientFileFid=await findOrNoteSubFolder(yearFid, 'お客様ファイル');
-        return {id:clientFileFid||yearFid, path:`2. 契約書 / クライアントへの発行 / ${year} / お客様ファイル`, mirror:null};
+        const okyakuFid=yearFid ? await findOrNoteSubFolder(yearFid, 'お客様ファイル') : FOLDERS.contract.client_okyakusama;
+        return {id:okyakuFid||FOLDERS.contract.client_okyakusama, path:`2. 契約書 / クライアントへの発行 / ${year} / お客様ファイル`, mirror:null};
       }
-      // 年 → 契約書 → 月 → 格納
-      const contractFid=await findOrNoteSubFolder(yearFid, '契約書');
-      if(!contractFid) return {id:yearFid, path:`2. 契約書 / クライアントへの発行 / ${year}`, mirror:null};
-      const monthFid=await findOrNoteMonthFolder(contractFid, monthStr);
-      return {id:monthFid||contractFid, path:`2. 契約書 / クライアントへの発行 / ${year} / 契約書 / ${monthStr}`, mirror:null};
+      // 年 → 契約書 → 月フォルダ → 格納
+      const keiyakuFid=yearFid ? await findOrNoteSubFolder(yearFid, '契約書') : FOLDERS.contract.client_keiyaku;
+      const targetKeiyaku=keiyakuFid||FOLDERS.contract.client_keiyaku;
+      const monthFid=await findOrNoteMonthFolder(targetKeiyaku, monthStr);
+      return {id:monthFid||targetKeiyaku, path:`2. 契約書 / クライアントへの発行 / ${year} / 契約書 / ${monthStr}`, mirror:null};
     }
     if(direction==='received'){
       if(sel.subFolder==='mama_works'){
